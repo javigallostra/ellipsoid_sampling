@@ -361,15 +361,15 @@ class EIT:
 
     def tesselate(self, n_times=1):
         self.vertices, self.faces = self._subdivide(self.vertices, self.faces, n_times)
-        #self._plot_polygon(self.vertices, self.faces, 0)
+        self._plot_polygon(self.vertices, self.faces, 0)
         px, py, pz = self._xyz_list(self.vertices)
-        #self._plot_points(px, py, pz, 0)
+        self._plot_points(px, py, pz, 0)
         vs = [self._oriented_base(i, self._xyz_to_normal(i)) for i in self.vertices]
         self._plot_points_bases(px, py, pz, [vs[i][0] for i in range(len(vs))], [vs[i][1] for i in range(len(vs))], [vs[i][2] for i in range(len(vs))], 0.15)
         #for i in range(len(vs)):
         #    print(self._rotation_to_quaternion(vs[i][0], vs[i][1], vs[i][2]))
 
-ob = EIT(1,1,1)
+ob = EIT(1,3,3)
 ob.tesselate(2)
 
 #Objectives:
