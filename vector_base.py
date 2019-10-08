@@ -1,3 +1,5 @@
+from math import sqrt
+
 class vector:
     """ Vector class."""
 
@@ -10,24 +12,33 @@ class vector:
         """
         
         self.values = []
+        # Single argument: scalar, list or tuple
         if len(args) == 1:
+            # Invalid argument type
             if type(args[0]) not in [type(0), type(0.0),type([]), type(())]:
                 raise TypeError("Only scalars or a scalar list/tuple can initialize a vector")
                 # @todo: delete object, initialization failed
+            # Scalar
             elif type(args[0]) in [type(0), type(0.0)]:
                 self.values.append(float(args[0]))
+            # List or tuple
             else:
                 for arg in args[0]:
+                    # Invalid argument type
                     if type(arg) not in [type(0), type(0.0)]:
                         raise TypeError("Only scalars or a scalar list/tuple can initialize a vector")
                         # @todo: delete object, initialization failed
+                    # Scalar
                     else:
                         self.values.append(float(arg))
+        # Multiple arguments: scalars
         else:
             for arg in args:
+                # Invalid argument type
                 if type(arg) not in [type(0), type(0.0)]:
                     raise TypeError("Only scalars or a scalar list/tuple can initialize a vector")
                     # @todo: delete object, initialization failed
+                # Scalar
                 else:
                     self.values.append(float(arg))
 
@@ -39,51 +50,41 @@ class vector:
         the returned value will be 0 but no error will be raised.
         """
         
-        # 1 - Check errors
-        # TypeError: only integers
+        # Invalid argument type
         if type(i) != type(0):
             raise TypeError("Only integer indices are allowed")
-        # IndexError: no negative indices
+        # Invalid argument value
         elif i < 0:
             raise IndexError("vector class does not support negative indices")
-        # 2 - Compute value
+        # Get vector value
         if i >= len(self.values):
             result = 0.0
         else:
             result = self.values[i]
-        # 3 - Return
+        # Return
         return result
 
     def __mul__(self, b):
-        """ Multiply by a scalar or another vector (dot product)."""
+        """ Multiply by a scalar or by another vector (dot product)."""
         
-        # 1 - Check errors
-        # TypeErrors: integers, floats and other vectors
+        # Invalid argument type
         if type(b) not in [type(0), type(0.0), type(self)]:
             raise TypeError("Only scalars or vectors are allowed")
-        # 2 - Compute value
         # Scalar multiplication
         if type(b) != type(self):
-            new_values = []
-            for i in range(len(self.values)):
-                new_values.append(self.values[i] * b)
-            result = vector(new_values)
+            result = vector([i * b for i in self.values])
         # Dot product
         else:
-            result = 0.0
-            for i in range(min(len(self.values), len(b.values))):
-                result += self.values[i] * b[i]
-        # 3 - Return
+            result = sum([self.values[i] * b[i] for i in range(min(len(self.values), len(b.values)))])
+        # Return
         return result
 
     def __imult__(self,b):
         """ Multiply itself by a scalar."""
         
-        # 1 - Check errors
-        # TypeErrors: integers, floats and other vectors
+        # Invalid argument type
         if type(b) not in [type(0), type(0.0)]:
             raise TypeError("Only scalars are allowed")
-        # 2 - Compute value
         # Scalar multiplication
         for i in range(len(self.values)):
             self.values[i] *= b
@@ -99,8 +100,42 @@ class vector:
     def __repr__(self):
         
         return str(self.values)
-            
-    # queremos: producto por escalar a*b
-    # queremos: producto por vector (dot product) a*b
-    # queremos: producto vectorial (cross product) a.cross(b)
+
+    def norm(self):
+        """ Compute the vector 2-norm."""
+
+        return sqrt(sum([i**2 for i in self.values]))
+
+    def normalize(self):
+        """ Normalize the vector."""
+
+        n = self.norm()
+        for i in range(len(self.values)):
+            self.values[i] /= n
+
+    def normalized(self):
+        """ Compute the normalized vector."""
+
+        n = self.norm()
+        return vector([i/n for i in self.values])
+
+    def cross(self, b):
+        """ Compute the cross product a^b.
+
+        Only works for vectors of dimension 3.
+        """
+
+        # Invalid argument type
+        if type(b) != type(self):
+            raise TypeError("Only vectors are allowed")
+        # Invalid dimensions
+        elif len(self.values) != 3 or len(b.values) != 3:
+            raise TypeError("Only 3 dimensional vectors are allowed")
+        # Cross product
+        c1 = self.values[1]*b.values[2] - b.values[1]*self.values[2]
+        c2 = -self.values[0]*b.values[2] + b.values[0]*self.values[2]
+        c3 = self.values[0]*b.values[1] - b.values[0]*self.values[1]
+        # Return
+        return vector(c1, c2, c3)
+
     # queremos: alguna manera de decir que es un vector unitario
