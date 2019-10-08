@@ -369,8 +369,8 @@ class EIT:
         #for i in range(len(vs)):
         #    print(self._rotation_to_quaternion(vs[i][0], vs[i][1], vs[i][2]))
 
-ob = EIT(1,3,3)
-ob.tesselate(2)
+ob = EIT(1,1,1)
+ob.tesselate(1)
 
 #Objectives:
 #   -From points to robtargets

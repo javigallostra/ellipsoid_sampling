@@ -89,6 +89,26 @@ class vector:
         for i in range(len(self.values)):
             self.values[i] *= b
 
+    def __add__(self, b):
+        """ Add a vector to another."""
+
+        # Invalid argument type
+        if type(b) != type(self):
+            raise TypeError("Only vectors are allowed")
+        # Return
+        return vector([self.values[i] + b[i] for i in range(max(len(self.values), len(b.values)))])
+
+    def __iadd__(self, b):
+        """ Add another vector to itself."""
+
+        # Invalid argument type
+        if type(b) != type(self):
+            raise TypeError("Only vectors are allowed")
+        # Compute addition
+        # @todo que pasa cuando dimself != dimb...
+        for i in range(max(len(self.values), len(b.values))):
+            self.values[i] += b[i]
+
     def __len__(self):
 
         return len(self.values)
