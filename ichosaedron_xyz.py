@@ -5,6 +5,8 @@ import matplotlib.colors as colors
 import scipy as sp
 import math
 from random import randint
+from vector_base import vector
+from basis_base import basis
 
 class EIT:
     """ Elipsoidal ichosaedron tesselation.
@@ -235,20 +237,21 @@ class EIT:
         # Call matplotlib plot()
         plt.show()
 
-    def _plot_points_bases(self, x, y, z, vx, vy, vz, crop_z=-10, plane=True, vec_scale=5):
+    def _plot_bases(self, bases, crop_z=-10, plane=True, vec_scale=5):
         """ Plot a set of 3D points with coordinate bases."""
 
         # Create figure with axes
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
-        # Filter points lower than crop distance
-        xc = [x[i] for i in range(len(x)) if z[i] >=crop_z]
-        yc = [y[i] for i in range(len(y)) if z[i] >=crop_z]
-        zc = [z[i] for i in range(len(z)) if z[i] >=crop_z]
-        vxc = [vx[i] for i in range(len(vx)) if z[i] >=crop_z]
-        vyc = [vy[i] for i in range(len(vy)) if z[i] >=crop_z]
-        vzc = [vz[i] for i in range(len(vz)) if z[i] >=crop_z]
-        print("# points: " + str(len(xc)))
+        # Filter bases with z lower than crop distance
+        filtered_bases = [i for i in bases if i.origin[2] >= crop_z]
+        xc = [i.origin[0] for i in filtered_bases]
+        yc = [i.origin[1] for i in filtered_bases]
+        zc = [i.origin[2] for i in filtered_bases]
+        vxc = [i.vx for i in filtered_bases]
+        vyc = [i.vy for i in filtered_bases]
+        vzc = [i.vz for i in filtered_bases]
+        print("# points: " + str(len(filtered_bases)))
         # Add points to graph
         ax.scatter(xc, yc, zc, c='r', marker='o')
         ax.set_xlabel('X Label')
@@ -274,9 +277,9 @@ class EIT:
     def _xyz_list(self, vs):
         """ Transform a nx3 array into 3 nx1 arrays."""
         
-        x = [i[0] for i in vs]
-        y = [i[1] for i in vs]
-        z = [i[2] for i in vs]
+        x = [vi[0] for vi in vs]
+        y = [vi[1] for vi in vs]
+        z = [vi[2] for vi in vs]
         return x,y,z
 
     def _xyz_to_normal(self, p):
@@ -286,62 +289,9 @@ class EIT:
         """
         
         px, py, pz = p
-        v = [2*px/(self.rx**2), 2*py/(self.ry**2), 2*pz/(self.rz**2)]
-        modulo = math.sqrt(v[0]**2 + v[1]**2 + v[2]**2)
-        normal = self._times(v, 1/modulo)
+        normal = vector(2*px/(self.rx**2), 2*py/(self.ry**2), 2*pz/(self.rz**2)).normalized()
         return normal
 
-    def _oriented_base(self, p, z_vector, flip_threshold=0.6):
-        """ Compute the oriented base of the z-vector of the base.
-
-        The assumption that the z component of the basis x-vector is zero
-        is made in order to compute the orientation base.
-        Flip_threshold is used to change the camera orientation based
-        on the height of the measurement points.
-        """
-        
-        x_modulo = math.sqrt(z_vector[0]**2 + z_vector[1]**2)
-        # Check for vertical vectors
-        if x_modulo != 0:
-                x_vector = [-z_vector[1]/x_modulo, z_vector[0]/x_modulo, 0]
-        else:
-            x_vector = [1, 0, 0]
-        y_vector = self._cross(z_vector, x_vector)
-
-        return self._base_rotate_around_z(x_vector, y_vector, z_vector, randint(-4, 4)*90/4)
-##        if p[2] >= flip_threshold:
-##            return self._base_rotate_around_z(x_vector, y_vector, z_vector, 180)
-##        else:
-##            return [x_vector, y_vector, z_vector]
-
-    def _base_rotate_around_z(self, vx, vy, vz, alfa):
-        """ Rotate a vector basis around its z vector."""
-
-        rad = math.radians(alfa)
-        # Rotate x vector using angle-axis formula
-        new1 = self._times(vz, self._dot(vz, vx))
-        new2 = self._times(self._cross(self._cross(vz, vx), vz), math.cos(rad))
-        new3 = self._times(self._cross(vz, vx), math.sin(rad))
-        new_vx = [new1[0]+new2[0]+new3[0], new1[1]+new2[1]+new3[1], new1[2]+new2[2]+new3[2]]
-        # Compute the new y vector using the cross product
-        new_vy = self._cross(vz, new_vx)
-        
-        return [new_vx, new_vy, vz]
-
-    def _cross(self, u, v):
-        """ Compute the cross product u^v."""
-
-        return [u[1]*v[2]-v[1]*u[2], -u[0]*v[2]+v[0]*u[2], u[0]*v[1]-v[0]*u[1]]
-
-    def _dot(self, u, v):
-        """ Compute the dot product u·v."""
-
-        return u[0]*v[0]+u[1]*v[1]+u[2]*v[2]
-
-    def _times(self, u, k):
-        """ Compute the scalar multiplication k*u."""
-
-        return [u[0]*k, u[1]*k, u[2]*k]
 
     def _rotation_to_quaternion(self, vx, vy, vz):
         """ Compute the quaternion (x,y,z,w) of a rotation matrix.
@@ -356,7 +306,7 @@ class EIT:
         y = (vz[0]-vx[2])/(4*w)
         z = (vx[1]-vy[0])/(4*w)
 
-        return [[x,y,z,w], math.sqrt(x**2+y**2+z**2+w**2)]
+        return [x,y,z,w]
         
 
     def tesselate(self, n_times=1):
@@ -364,13 +314,13 @@ class EIT:
         self._plot_polygon(self.vertices, self.faces, 0)
         px, py, pz = self._xyz_list(self.vertices)
         self._plot_points(px, py, pz, 0)
-        vs = [self._oriented_base(i, self._xyz_to_normal(i)) for i in self.vertices]
-        self._plot_points_bases(px, py, pz, [vs[i][0] for i in range(len(vs))], [vs[i][1] for i in range(len(vs))], [vs[i][2] for i in range(len(vs))], 0.15)
+        vs = [basis(i, self._xyz_to_normal(i)) for i in self.vertices]
+        self._plot_bases(vs, 0.15)
         #for i in range(len(vs)):
         #    print(self._rotation_to_quaternion(vs[i][0], vs[i][1], vs[i][2]))
 
 ob = EIT(1,1,1)
-ob.tesselate(1)
+ob.tesselate(2)
 
 #Objectives:
 #   -From points to robtargets

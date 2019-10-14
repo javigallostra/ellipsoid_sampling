@@ -4,11 +4,17 @@ from math import radians, sin, cos
 class basis:
     """ Basis class."""
 
-    def __init__(self):
-        self.origin = vector(0,0,0)
-        self.vx = vector(1,0,0)
-        self.vy = vector(0,1,0)
-        self.vz = vector(0,0,1)
+    def __init__(self, origin = 0, vz = 0):
+        if not origin:
+            self.origin = vector(0,0,0)
+        else:
+            self.origin = vector(origin)
+        if not vz:
+            self.vx = vector(1,0,0)
+            self.vy = vector(0,1,0)
+            self.vz = vector(0,0,1)
+        else:
+            self.set_vz(vz)
 
     def set_vz(self, vz):
         """ Generate a basis based on a vz vector.
@@ -20,11 +26,12 @@ class basis:
         
         self.vz = vector(vz).normalized()
         # Check for vertical vz
-        if self.vz[2] != 1:
-            self.vx = vector(-vz[1], vz[0], 0).normalized()
-        else:
+        self.vx = vector(-vz[1], vz[0], 0)
+        if self.vx.norm() == 0:
             self.vx = vector(1,0,0)
-        self.vy = vz.cross(vx).normalized()
+        else:
+            self.vx.normalize()
+        self.vy = self.vz.cross(self.vx).normalized()
         
 
     def rotate_z(self, alfa):
