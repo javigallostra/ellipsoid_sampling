@@ -12,12 +12,17 @@ class vector:
         """
         
         self.values = []
-        # Single argument: scalar, list or tuple
+        self.iter_n = 0
+        # Single argument: vector, scalar, list or tuple
         if len(args) == 1:
             # Invalid argument type
-            if type(args[0]) not in [type(0), type(0.0),type([]), type(())]:
-                raise TypeError("Only scalars or a scalar list/tuple can initialize a vector")
+            if type(args[0]) not in [type(self), type(0), type(0.0),type([]), type(())]:
+                raise TypeError("Only vectors, scalars or a scalar list/tuple can initialize a vector")
                 # @todo: delete object, initialization failed
+            # Vector
+            elif type(args[0]) == type(self):
+                for element in args[0]:
+                    self.values.append(element)
             # Scalar
             elif type(args[0]) in [type(0), type(0.0)]:
                 self.values.append(float(args[0]))
@@ -26,7 +31,7 @@ class vector:
                 for arg in args[0]:
                     # Invalid argument type
                     if type(arg) not in [type(0), type(0.0)]:
-                        raise TypeError("Only scalars or a scalar list/tuple can initialize a vector")
+                        raise TypeError("Only a scalar list/tuple can initialize a vector")
                         # @todo: delete object, initialization failed
                     # Scalar
                     else:
@@ -36,7 +41,7 @@ class vector:
             for arg in args:
                 # Invalid argument type
                 if type(arg) not in [type(0), type(0.0)]:
-                    raise TypeError("Only scalars or a scalar list/tuple can initialize a vector")
+                    raise TypeError("Only scalars can initialize a vector")
                     # @todo: delete object, initialization failed
                 # Scalar
                 else:
@@ -120,6 +125,20 @@ class vector:
     def __repr__(self):
         
         return str(self.values)
+
+    def __iter__(self):
+        
+        self.iter_n = 0
+        return self
+
+    def __next__(self):
+        
+        if self.iter_n < len(self.values):
+            element = self.values[self.iter_n]
+            self.iter_n += 1
+            return element
+        else:
+            raise StopIteration
 
     def norm(self):
         """ Compute the vector 2-norm."""
