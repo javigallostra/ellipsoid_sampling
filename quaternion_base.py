@@ -38,8 +38,8 @@ class quaternion:
                             raise TypeError("Only a scalar list/tuple can initialize a quaternion")
                             # @todo: delete object, initialization failed
                         # Invalid scalar
-                        elif arg > 1 or arg < 0:
-                            raise ValueError("Only scalars between 0 and 1 can initialize a quaternion")
+                        elif abs(arg) > 1:
+                            raise ValueError("Only scalars between -1 and 1 can initialize a quaternion")
                             # @todo: delete object, initialization failed
                         # Valid scalar
                         else:
@@ -57,8 +57,8 @@ class quaternion:
                         raise TypeError("Only scalars can initialize a quaternion")
                         # @todo: delete object, initialization failed
                     # Invalid scalar
-                    elif arg > 1 or arg < 0:
-                        raise ValueError("Only scalars between 0 and 1 can initialize a quaternion")
+                    elif abs(arg) > 1:
+                        raise ValueError("Only scalars between -1 and 1 can initialize a quaternion")
                         # @todo: delete object, initialization failed
                     # Valid scalar
                     else:
@@ -129,3 +129,39 @@ class quaternion:
 
         n = self.norm()
         return quaternion([i/n for i in self.values])
+
+    def from_matrix(self, matrix):
+        """ Compute a quaternion from an orthonormal rotation matrix."""
+        
+        m = matrix
+        # Compute trace
+        trace = m[0][0] + m[1][1] + m[2][2]
+        # Compute x,y,z,w
+        if trace > 0: 
+            S = sqrt(trace + 1) * 2
+            w = 0.25 * S
+            x = (m[2][1] - m[1][2]) / S
+            y = (m[0][2] - m[2][0]) / S
+            z = (m[1][0] - m[0][1]) / S
+        elif m[0][0] > m[1][1] and m[0][0] > m[2][2]: 
+            S = sqrt(1 + m[0][0] - m[1][1] - m[2][2]) * 2 
+            w = (m[2][1] - m[1][2]) / S
+            x = 0.25 * S
+            y = (m[0][1] + m[1][0]) / S
+            z = (m[0][2] + m[2][0]) / S 
+        elif m[1][1] > m[2][2]: 
+            S = sqrt(1 + m[1][1] - m[0][0] - m[2][2]) * 2
+            w = (m[0][2] - m[2][0]) / S
+            x = (m[0][1] + m[1][0]) / S 
+            y = 0.25 * S
+            z = (m[1][2] + m[2][1]) / S
+        else:
+            S = sqrt(1 + m[2][2] - m[0][0] - m[1][1]) * 2
+            w = (m[1][0] - m[0][1]) / S
+            x = (m[0][2] + m[2][0]) / S
+            y = (m[1][2] + m[2][1]) / S
+            z = 0.25 * S
+        # Get result
+        result = quaternion(x,y,z,w)
+        # Return
+        return result
