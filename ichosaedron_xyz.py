@@ -7,6 +7,7 @@ import math
 from random import randint
 from vector_base import vector
 from basis_base import basis
+from quaternion_base import quaternion
 
 class EIT:
     """ Elipsoidal ichosaedron tesselation.
@@ -311,15 +312,19 @@ class EIT:
 
     def tesselate(self, n_times=1):
         self.vertices, self.faces = self._subdivide(self.vertices, self.faces, n_times)
-        self._plot_polygon(self.vertices, self.faces, 0)
+        #self._plot_polygon(self.vertices, self.faces, 0)
         px, py, pz = self._xyz_list(self.vertices)
-        self._plot_points(px, py, pz, 0)
+        #self._plot_points(px, py, pz, 0)
         vs = [basis(i, self._xyz_to_normal(i)) for i in self.vertices]
-        self._plot_bases(vs, 0.15)
-        #for i in range(len(vs)):
+        #self._plot_bases(vs, 0.15)
+        for i in range(len(vs)):
         #    print(self._rotation_to_quaternion(vs[i][0], vs[i][1], vs[i][2]))
+            a = quaternion()
+            b = a.from_matrix(vs[i].matrix())
+            print(b)
+            print (b.normalized())
 
-ob = EIT(1,1,1)
+ob = EIT(1,1,3)
 ob.tesselate(2)
 
 #Objectives:
