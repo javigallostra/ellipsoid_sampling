@@ -41,3 +41,12 @@ class basis:
         # Rotation using angle-axis formula
         self.vx = self.vz*(self.vx*self.vz) + self.vz.cross(self.vx).cross(self.vz)*cos(rad) + self.vz.cross(self.vx)*sin(rad)
         self.vy = self.vz.cross(self.vx)
+
+    def matrix(self):
+        """ Get the matrix representation of the basis orientation.
+
+        The matrix is returned as a list of vectors.
+        """
+
+        matrix = [vector(self.vx), vector(self.vy), vector(self.vz)]
+        return matrix
