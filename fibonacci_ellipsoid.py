@@ -125,7 +125,7 @@ class EFS(ellipsoid_base):
 
     def tesselate(self, n_times=1):
         px, py, pz = self._xyz_list(self.points)
-        self._plot_points(px, py, pz, 0.15)
+        self._plot_points(px, py, pz)
         vs = [basis(i, self._point_normal(i)) for i in self.points]
         self._plot_bases(vs, 0.15)
         for i in range(len(vs)):
