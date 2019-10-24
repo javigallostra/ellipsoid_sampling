@@ -293,42 +293,20 @@ class EIT:
         normal = vector(2*px/(self.rx**2), 2*py/(self.ry**2), 2*pz/(self.rz**2)).normalized()
         return normal
 
-
-    def _rotation_to_quaternion(self, vx, vy, vz):
-        """ Compute the quaternion (x,y,z,w) of a rotation matrix.
-
-        If the rotation matrix is orthonormal, the resulting quaternion
-        will be unitary.
-        """
-
-        # Using max to avoid numerical errors of close to zero negative numbers
-        w = 0.5*math.sqrt(max(0,1+vx[0]+vy[1]+vz[2]))
-        x = (vy[2]-vz[1])/(4*w)
-        y = (vz[0]-vx[2])/(4*w)
-        z = (vx[1]-vy[0])/(4*w)
-
-        return [x,y,z,w]
-        
-
     def tesselate(self, n_times=1):
         self.vertices, self.faces = self._subdivide(self.vertices, self.faces, n_times)
-        #self._plot_polygon(self.vertices, self.faces, 0)
+        self._plot_polygon(self.vertices, self.faces)
         px, py, pz = self._xyz_list(self.vertices)
         #self._plot_points(px, py, pz, 0)
         vs = [basis(i, self._xyz_to_normal(i)) for i in self.vertices]
         #self._plot_bases(vs, 0.15)
         for i in range(len(vs)):
-        #    print(self._rotation_to_quaternion(vs[i][0], vs[i][1], vs[i][2]))
             a = quaternion()
             b = a.from_matrix(vs[i].matrix())
-            print(b)
-            print (b.normalized())
 
 ob = EIT(1,1,3)
 ob.tesselate(2)
 
 #Objectives:
 #   -From points to robtargets
-# FIX quaternion to avoid division by zero
-# http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
 # ¿Qué herramienta y qué workboject se usa? Pör ahora los puntos están centrados en la mesa.
