@@ -5,143 +5,127 @@ import matplotlib.colors as colors
 import scipy as sp
 import math
 from random import randint
+from point_base import point
 from vector_base import vector
 from basis_base import basis
 from quaternion_base import quaternion
+from ellipsoid_base import ellipsoid_base
 
-class EIT:
-    """ Elipsoidal ichosaedron tesselation.
+class EIT(ellipsoid_base):
+    """ Ellipsoidal ichosaedron tesselation.
 
-    Create an elipsoidal ichosaedron and perform
+    Create an ellipsoidal ichosaedron and perform
     triangular subdivisions (1 to 4) to tesellate its surface.
     """
 
-    def __init__(self, rx=1, ry=1, rz=1, precision=3):
-        self.rx = rx
-        self.ry = ry
-        self.rz = rz
-        self.dec_prec = precision
-        self.vertices, self.faces = self._ichosaedron()
+    def __init__(self, rx=1, ry=1, rz=1):
+        super().__init__(rx, ry, rz)
+        self.points, self.faces = self._ichosaedron()
 
     def _ichosaedron(self):
-        """ Create a 'regular' elipsoidal ichosaedron.
+        """ Create a 'regular' ellipsoidal ichosaedron.
 
         Use the radii defined in the constructor
         to shape the regular ichosaedron to the desired
         elipsoid.
         """
         
-        # Create vertices in order (polar coord)
-        v0 = [90,0]
-        v11 = [-90,0]
-        v1_5 = [[26.57, 2*i*36] for i in range(0,5)]
-        v6_10 = [[-26.57, (2*i+1)*36] for i in range(0,5)]
-        # Create vertex list in order (cartesian coord)
-        v = [self._polar_to_cart(v0)]
+        # Create points in order (spherical coord)
+        p0 = point(90, 0, None, "spherical")
+        p1_5 = [point(26.57, 2*i*36, None, "spherical") for i in range(0,5)]
+        p6_10 = [point(-26.57, (2*i+1)*36, None, "spherical") for i in range(0,5)]
+        p11 = point(-90, 0, None, "spherical")
+        # Create point list in order (cartesian coord)
+        points = [self._spherical_to_cart(p0)]
         for i in range(0,5):
-            v.append(self._polar_to_cart(v1_5[i]))
-            v.append(self._polar_to_cart(v6_10[i]))
-        v.append(self._polar_to_cart(v11))
+            points.append(self._spherical_to_cart(p1_5[i]))
+            points.append(self._spherical_to_cart(p6_10[i]))
+        points.append(self._spherical_to_cart(p11))
         # Create faces with the ordered vertices
-        f = []
+        faces = []
         for i in range(0,4):
-            f.append([0,2*i+1,2*(i+1)+1])
-            f.append([11,2*(i+1),2*(i+2)])
+            faces.append([0,2*i+1,2*(i+1)+1])
+            faces.append([11,2*(i+1),2*(i+2)])
         for i in range(0,8):
-            f.append([i+1,i+2,i+3])
-        f.append([0,1,9])
-        f.append([11,2,10])
-        f.append([9,10,1])
-        f.append([10,1,2])
+            faces.append([i+1,i+2,i+3])
+        faces.append([0,1,9])
+        faces.append([11,2,10])
+        faces.append([9,10,1])
+        faces.append([10,1,2])
         # Return
-        return v,f
+        return points, faces
 
-    def _polar_to_cart(self, v):
-        """ Polar to cartesian point mapping."""
-        
-        z = self.rz*math.sin(math.radians(v[0]))
-        xy = math.cos(math.radians(v[0]))
-        x = self.rx*xy*math.cos(math.radians(v[1]))
-        y = self.ry*xy*math.sin(math.radians(v[1]))
-        return [round(x, self.dec_prec), round(y, self.dec_prec), round(z, self.dec_prec)]
+    def _point_interpolation(self, p1, p2):
+        """ Point interpolation function.
 
-    def _cart_to_polar(self, v):
-        """ Cartesian to polar point mapping."""
-
-        x, y, z = v
-        xy = math.sqrt(x**2 + y**2)
-        merid = math.degrees(math.atan2(y, x))
-        paral = math.degrees(math.atan2(z, xy))
-        return [paral, merid]
-
-    def _vertex_interpolation(self, v1, v2):
-        """ Vertices interpolation function.
-
-        Find the point equidistant to v1,v2
-        lying on the elipsoid.
+        Find the point equidistant to p1,p2
+        lying on the ellipsoid.
         """
 
-        # Find the middle point of v1-v2
-        vx = v1[0] + (v2[0]-v1[0])/2
-        vy = v1[1] + (v2[1]-v1[1])/2
-        vz = v1[2] + (v2[2]-v1[2])/2
-        # Project the point onto the elipsoid
+        # Find the middle point of p1-p2
+        p = p1 + (p1 - p2)/2
+        # Project the point onto the ellipsoid
+        # Impossible case: 0,0,0
+        if p.count(0) == 3:
+            x = 0.0
+            y = 0.0
+            z = 0.0
         # Axial points
-        if [vx,vy,vz].count(0) == 2:
-            x = self.rx*vx/abs(vx) if vx else 0
-            y = self.ry*vy/abs(vy) if vy else 0
-            z = self.rz*vz/abs(vz) if vz else 0
+        elif p.count(0) == 2:
+            x = self.rx * p.x / abs(p.x) if p.x else 0.0
+            y = self.ry * p.y / abs(p.y) if p.y else 0.0
+            z = self.rz * p.z / abs(p.z) if p.z else 0.0
         # Planar points
-        elif [vx,vy,vz].count(0) == 1:
+        elif p.count(0) == 1:
             #plane x=0
-            if vx == 0:
-                x = 0
+            if p.x == 0:
+                x = 0.0
                 #find y
-                dydz = vy/vz
-                y_num = self.ry*self.rz*abs(dydz)
-                y_den = math.sqrt((self.rz*dydz)**2 + self.ry**2)
+                dydz = p.y / p.z
+                y_num = self.ry * self.rz * abs(dydz)
+                y_den = math.sqrt((self.rz * dydz)**2 + self.ry**2)
                 y = y_num/y_den
-                if vy < 0: y = -y
+                if p.y < 0: y = -y
                 #compute z
-                z = y/dydz
+                z = y / dydz
             #plane y=0
-            elif vy == 0:
-                y = 0
+            elif p.y == 0:
+                y = 0.0
                 #find x
-                dxdz = vx/vz
-                x_num = self.rx*self.rz*abs(dxdz)
-                x_den = math.sqrt((self.rz*dxdz)**2 + self.rx**2)
-                x = x_num/x_den
-                if vx < 0: x = -x
+                dxdz = p.x / p.z
+                x_num = self.rx * self.rz * abs(dxdz)
+                x_den = math.sqrt((self.rz * dxdz)**2 + self.rx**2)
+                x = x_num / x_den
+                if p.x < 0: x = -x
                 #compute z
-                z = x/dxdz
+                z = x / dxdz
             #plane z=0
-            elif vz == 0:
-                z = 0
+            elif p.z == 0:
+                z = 0.0
                 #find x
-                dxdy = vx/vy
-                x_num = self.rx*self.ry*abs(dxdy)
-                x_den = math.sqrt((self.ry*dxdy)**2 + self.rx**2)
-                x = x_num/x_den
-                if vx < 0: x = -x
+                dxdy = p.x / p.y
+                x_num = self.rx * self.ry * abs(dxdy)
+                x_den = math.sqrt((self.ry * dxdy)**2 + self.rx**2)
+                x = x_num / x_den
+                if p.x < 0: x = -x
                 #compute z
-                y = x/dxdy
+                y = x / dxdy
         # Quadrant points
-        elif vx!=0 and vy!=0 and vz!=0:
+        else:
             #find x
-            dxdy = vx/vy
-            dxdz = vx/vz
-            x_num = self.rx*self.ry*self.rz*abs(dxdy*dxdz)
-            x_den = math.sqrt((dxdy*self.ry*dxdz*self.rz)**2 + (self.rx*dxdz*self.rz)**2 + (self.rx*dxdy*self.ry)**2)
-            x = x_num/x_den
-            if vx < 0: x = -x
+            dxdy = p.x / p.y
+            dxdz = p.x / p.z
+            x_num = self.rx * self.ry  *self.rz * abs(dxdy * dxdz)
+            x_den = math.sqrt((dxdy * self.ry * dxdz * self.rz)**2 + (self.rx * dxdz * self.rz)**2 + (self.rx * dxdy * self.ry)**2)
+            x = x_num / x_den
+            if p.x < 0: x = -x
             #compute y, z
-            y = x/dxdy
-            z = x/dxdz
+            y = x / dxdy
+            z = x / dxdz
         # Return
-        return [round(x, self.dec_prec), round(y, self.dec_prec), round(z, self.dec_prec)]
+        return point(x, y, z)
 
-    def _subdivide(self, v, f, times=1):
+    def _subdivide(self, points, faces, times=1):
         """ Recursive triangular subdivision.
 
         Subdivide each surface triangle into 4
@@ -151,35 +135,32 @@ class EIT:
 
         # End case
         if times == 0:
-            return (v, f)
+            return (points, faces)
         # Recursive case
         else:
-            newf = []
-            newv = []
+            new_faces = []
+            new_points = []
             # Perform subdivision
-            for i in range(len(f)):
-                #copy existing vertices
-                v0 = list(v[f[i][0]])
-                v2 = list(v[f[i][1]])
-                v4 = list(v[f[i][2]])
+            for i in range(len(faces)):
+                #copy existing points
+                p0 = points[faces[i][0]] * 1
+                p2 = points[faces[i][1]] * 1
+                p4 = points[faces[i][2]] * 1
                 #interpolate new vertices
-                v1 = self._vertex_interpolation(v0,v2)
-                v3 = self._vertex_interpolation(v2,v4)
-                v5 = self._vertex_interpolation(v4,v0)
+                p1 = self._point_interpolation(p0, p2)
+                p3 = self._point_interpolation(p2, p4)
+                p5 = self._point_interpolation(p4, p0)
                 #add vertices if not repeated
-                if v0 not in newv: newv.append(v0)
-                if v1 not in newv: newv.append(v1)
-                if v2 not in newv: newv.append(v2)
-                if v3 not in newv: newv.append(v3)
-                if v4 not in newv: newv.append(v4)
-                if v5 not in newv: newv.append(v5)
+                for new_point in [p0, p1, p2, p3, p4, p5]:
+                    if new_point not in new_points:
+                        new_points.append(new_point)
                 #add faces
-                newf.append([newv.index(v0),newv.index(v1),newv.index(v5)])
-                newf.append([newv.index(v1),newv.index(v2),newv.index(v3)])
-                newf.append([newv.index(v3),newv.index(v4),newv.index(v5)])
-                newf.append([newv.index(v1),newv.index(v3),newv.index(v5)])
+                new_faces.append([new_points.index(p0), new_points.index(p1), new_points.index(p5)])
+                new_faces.append([new_points.index(p1), new_points.index(p2), new_points.index(p3)])
+                new_faces.append([new_points.index(p3), new_points.index(p4), new_points.index(p5)])
+                new_faces.append([new_points.index(p1), new_points.index(p3), new_points.index(p5)])
             # Recursion
-            return self._subdivide(newv, newf, times-1)
+            return self._subdivide(new_points, new_faces, times-1)
 
     def _plot_polygon(self, v, f, crop_z=-10, plane=True):
         """ Plot a polygon defined by vertices v and faces f."""
@@ -283,46 +264,16 @@ class EIT:
         z = [vi[2] for vi in vs]
         return x,y,z
 
-    def _xyz_to_normal(self, p):
-        """ Compute the normal of an ellipsoid surface point.
-
-        The normal is unitary and facing inwards the ellipsoid.
-        """
-        
-        px, py, pz = p
-        normal = vector(2*px/(self.rx**2), 2*py/(self.ry**2), 2*pz/(self.rz**2)).normalized()
-        return normal
-
-
-    def _rotation_to_quaternion(self, vx, vy, vz):
-        """ Compute the quaternion (x,y,z,w) of a rotation matrix.
-
-        If the rotation matrix is orthonormal, the resulting quaternion
-        will be unitary.
-        """
-
-        # Using max to avoid numerical errors of close to zero negative numbers
-        w = 0.5*math.sqrt(max(0,1+vx[0]+vy[1]+vz[2]))
-        x = (vy[2]-vz[1])/(4*w)
-        y = (vz[0]-vx[2])/(4*w)
-        z = (vx[1]-vy[0])/(4*w)
-
-        return [x,y,z,w]
-        
-
     def tesselate(self, n_times=1):
-        self.vertices, self.faces = self._subdivide(self.vertices, self.faces, n_times)
-        #self._plot_polygon(self.vertices, self.faces, 0)
-        px, py, pz = self._xyz_list(self.vertices)
-        #self._plot_points(px, py, pz, 0)
-        vs = [basis(i, self._xyz_to_normal(i)) for i in self.vertices]
-        #self._plot_bases(vs, 0.15)
+        self.points, self.faces = self._subdivide(self.points, self.faces, n_times)
+        self._plot_polygon(self.points, self.faces, 0)
+        px, py, pz = self._xyz_list(self.points)
+        self._plot_points(px, py, pz, 0)
+        vs = [basis(i, self._point_normal(i)) for i in self.points]
+        self._plot_bases(vs, 0.15)
         for i in range(len(vs)):
-        #    print(self._rotation_to_quaternion(vs[i][0], vs[i][1], vs[i][2]))
             a = quaternion()
             b = a.from_matrix(vs[i].matrix())
-            print(b)
-            print (b.normalized())
 
 ob = EIT(1,1,3)
 ob.tesselate(2)
