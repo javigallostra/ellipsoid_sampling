@@ -15,3 +15,8 @@ The following list shows the implemented and WIP methods.
 - [ ] **Fibonacci Spiral** sample a unit sphere using a Fibonacci Spiral and an arbitrary number of points, and project the resulting points onto the ellipsoid
 
 ## sample results
+Ellipsoid with "radii" (1,1,3) subdivided twice and tesselated.
+
+![Go to image.][logo]
+
+[logo]: https://github.com/javigallostra/ellipsoid_sampling/blob/master/sample_res_ich.png "Ichosaedron sampling and tesellation"
