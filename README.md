@@ -12,11 +12,17 @@ as equally as possible an arbitrary number of points on the surface of an arbitr
 The following list shows the implemented and WIP methods.
 
 - [x] **Ichosaedron** sample a unit sphere using the vertices of a regular ichosaedron, subdivide its edges a defined number of times, and project the resulting points onto the ellipsoid
-- [ ] **Fibonacci Spiral** sample a unit sphere using a Fibonacci Spiral and an arbitrary number of points, and project the resulting points onto the ellipsoid
+- [x] **Fibonacci Spiral** sample a unit sphere using a Fibonacci Spiral and an arbitrary number of points, and project the resulting points onto the ellipsoid
 
 ## sample results
 Ellipsoid with "radii" (1,1,3) subdivided twice and tesselated.
 
-![Go to image.][logo]
+![Go to image.][imich]
 
-[logo]: https://github.com/javigallostra/ellipsoid_sampling/blob/master/sample_res_ich.png "Ichosaedron sampling and tesellation"
+[imich]: https://github.com/javigallostra/ellipsoid_sampling/blob/master/sample_res_ich.png "Ichosaedron sampling and tesellation"
+
+Ellipsoid with "radii" (1,1,3) sampled using the Fibonacci Spiral method with 100 points.
+
+![Go to image.][imfib]
+
+[imfib]: https://github.com/javigallostra/ellipsoid_sampling/blob/master/sample_res_fib.png "Fibonacci Spiral sampling using 100 points"
