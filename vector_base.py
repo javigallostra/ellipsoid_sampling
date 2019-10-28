@@ -1,4 +1,5 @@
 from math import sqrt
+from point_base import point
 
 class vector:
     """ Vector class."""
@@ -16,11 +17,11 @@ class vector:
         # Single argument: vector, scalar, list or tuple
         if len(args) == 1:
             # Invalid argument type
-            if type(args[0]) not in [type(self), type(0), type(0.0),type([]), type(())]:
-                raise TypeError("Only vectors, scalars or a scalar list/tuple can initialize a vector")
+            if type(args[0]) not in [type(self), type(point()), type(0), type(0.0),type([]), type(())]:
+                raise TypeError("Only vectors, points, scalars or a scalar list/tuple can initialize a vector")
                 # @todo: delete object, initialization failed
-            # Vector
-            elif type(args[0]) == type(self):
+            # Vector or point
+            elif type(args[0]) == type(self) or type(args[0]) == type(point):
                 for element in args[0]:
                     self.values.append(element)
             # Scalar
@@ -84,7 +85,7 @@ class vector:
         # Return
         return result
 
-    def __imult__(self,b):
+    def __imul__(self,b):
         """ Multiply itself by a scalar."""
         
         # Invalid argument type
