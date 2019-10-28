@@ -115,6 +115,17 @@ class vector:
         for i in range(max(len(self.values), len(b.values))):
             self.values[i] += b[i]
 
+    def __sub__(self, b):
+        """ Substract a vector to another."""
+
+        # Return
+        return self.__add__(b * -1)
+
+    def __isub__(self, b):
+        """ Substract another vector from itself."""
+
+        self.__iadd__(b * -1)
+
     def __len__(self):
 
         return len(self.values)
@@ -150,14 +161,18 @@ class vector:
         """ Normalize the vector."""
 
         n = self.norm()
-        for i in range(len(self.values)):
-            self.values[i] /= n
+        if n != 0:
+            for i in range(len(self.values)):
+                self.values[i] /= n
 
     def normalized(self):
         """ Compute the normalized vector."""
 
         n = self.norm()
-        return vector([i/n for i in self.values])
+        if n == 0:
+            return vector([0.0 for i in self.values])
+        else:
+            return vector([i/n for i in self.values])
 
     def cross(self, b):
         """ Compute the cross product a^b.
