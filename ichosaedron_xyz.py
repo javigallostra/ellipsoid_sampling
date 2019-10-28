@@ -271,6 +271,7 @@ class EIT(ellipsoid_base):
         self._plot_points(px, py, pz, 0)
         vs = [basis(i, self._point_normal(i)) for i in self.points]
         self._plot_bases(vs, 0.15)
+
         for i in range(len(vs)):
             a = quaternion()
             b = a.from_matrix(vs[i].matrix())
@@ -280,6 +281,4 @@ ob.tesselate(2)
 
 #Objectives:
 #   -From points to robtargets
-# FIX quaternion to avoid division by zero
-# http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
 # ¿Qué herramienta y qué workboject se usa? Pör ahora los puntos están centrados en la mesa.
