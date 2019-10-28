@@ -63,7 +63,7 @@ class EIT(ellipsoid_base):
         """
 
         # Find the middle point of p1-p2
-        p = p1 + (p1 - p2)/2
+        p = p1 + (p2 - p1)/2
         # Project the point onto the ellipsoid
         # Impossible case: 0,0,0
         if p.count(0) == 3:
