@@ -21,6 +21,7 @@ class EIT(ellipsoid_base):
     def __init__(self, rx=1, ry=1, rz=1):
         super().__init__(rx, ry, rz)
         self.points, self.faces = self._ichosaedron()
+        self.basis = [basis(i, self._point_normal(i)) for i in self.points]
 
     def _ichosaedron(self):
         """ Create a 'regular' ellipsoidal ichosaedron.
@@ -162,97 +163,76 @@ class EIT(ellipsoid_base):
             # Recursion
             return self._subdivide(new_points, new_faces, times-1)
 
-    def _plot_polygon(self, v, f, crop_z=-10, plane=True):
-        """ Plot a polygon defined by vertices v and faces f."""
+    def plot(self, points=True, basis=False, faces=False, crop_z=None):
+        """ Plot the sampled ellipsoid."""
 
         # Create axes
         ax = a3.Axes3D(plt.figure())
-        # Add polygon faces
-        for i in range(len(f)):
-            poly=[v[f[i][0]], v[f[i][1]], v[f[i][2]]]
-            #add only if higher than crop distance
-            if poly[0][2]>=crop_z and poly[1][2]>=crop_z and poly[2][2]>=crop_z:
+        # Plot points if desired
+        if points:
+            # Crop
+            if crop_z != None:
+                points_crop = [p for p in self.points if p[2] >=crop_z]
+            else:
+                points_crop = self.points
+            # Prepare
+            px, py, pz = self._xyz_list(points_crop)
+            # Plot
+            ax.scatter(px, py, pz, c='r', marker='o')
+        # Plot basis if desired
+        if basis:
+            # Crop
+            if crop_z != None:
+                basis_crop = [b for b in self.basis if b.origin[2] >= crop_z]
+            else:
+                basis_crop = self.basis
+            # Prepare
+            px = [b.origin[0] for b in basis_crop]
+            py = [b.origin[1] for b in basis_crop]
+            pz = [b.origin[2] for b in basis_crop]
+            vx = [b.vx for b in basis_crop]
+            vy = [b.vy for b in basis_crop]
+            vz = [b.vz for b in basis_crop]
+            # Plot
+            scale = 5
+            ax.quiver(px, py, pz, [v[0]/scale for v in vx], [v[1]/scale for v in vx], [v[2]/scale for v in vx], color="red", arrow_length_ratio=0.5)
+            ax.quiver(px, py, pz, [v[0]/scale for v in vy], [v[1]/scale for v in vy], [v[2]/scale for v in vy], color="green", arrow_length_ratio=0.5)
+            ax.quiver(px, py, pz, [v[0]/scale for v in vz], [v[1]/scale for v in vz], [v[2]/scale for v in vz], color="blue", arrow_length_ratio=0.5)
+        # Plot faces if desired
+        if faces:
+            # Plot each face
+            for f in self.faces:
+                poly=[self.points[f[0]], self.points[f[1]], self.points[f[2]]]
+                # Crop
+                if crop_z != None:
+                    if not(poly[0][2]>=crop_z and poly[1][2]>=crop_z and poly[2][2]>=crop_z):
+                        continue
+                # Plot
                 face = a3.art3d.Poly3DCollection([poly])
                 face.set_alpha(1)
                 face.set_color(colors.rgb2hex(sp.rand(3)))
                 face.set_edgecolor('k')
                 ax.add_collection3d(face)
         # Add visual plane
-        if plane:
-            poly = [[1,1,0],[-1,1,0],[-1,-1,0],[1,-1,0]]
+        if crop_z != None:
+            poly = [[self.rx,self.ry,crop_z],[-self.rx,self.ry,crop_z],[-self.rx,-self.ry,crop_z],[self.rx,-self.ry,crop_z]]
             face = a3.art3d.Poly3DCollection([poly])
-            face.set_alpha(0.1)
+            face.set_alpha(0.5)
             face.set_color(colors.rgb2hex(sp.rand(3)))
             face.set_edgecolor('k')
             ax.add_collection3d(face)
+        # Add labels
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
         # Scale
-        ax.auto_scale_xyz([-1, 1], [-1, 1], [-1, 1])
-        # Call matplotlib plot()
-        plt.show()
-
-    def _plot_points(self, x, y, z, crop_z=-10, plane=True):
-        """ Plot a set of 3D points."""
-
-        # Create figure with axes
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        # Filter points lower than crop distance
-        xc = [x[i] for i in range(len(x)) if z[i] >=crop_z]
-        yc = [y[i] for i in range(len(y)) if z[i] >=crop_z]
-        zc = [z[i] for i in range(len(z)) if z[i] >=crop_z]
-        print("# points: " + str(len(xc)))
-        # Add points to graph
-        ax.scatter(xc, yc, zc, c='r', marker='o')
-        ax.set_xlabel('X Label')
-        ax.set_ylabel('Y Label')
-        ax.set_zlabel('Z Label')
-        # Add visual plane
-        if plane:
-            poly = [[1,1,0],[-1,1,0],[-1,-1,0],[1,-1,0]]
-            face = a3.art3d.Poly3DCollection([poly])
-            face.set_alpha(0.1)
-            face.set_color(colors.rgb2hex(sp.rand(3)))
-            face.set_edgecolor('k')
-            ax.add_collection3d(face)
-        # Scale
-        ax.auto_scale_xyz([-1, 1], [-1, 1], [-1, 1])
-        # Call matplotlib plot()
-        plt.show()
-
-    def _plot_bases(self, bases, crop_z=-10, plane=True, vec_scale=5):
-        """ Plot a set of 3D points with coordinate bases."""
-
-        # Create figure with axes
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        # Filter bases with z lower than crop distance
-        filtered_bases = [i for i in bases if i.origin[2] >= crop_z]
-        xc = [i.origin[0] for i in filtered_bases]
-        yc = [i.origin[1] for i in filtered_bases]
-        zc = [i.origin[2] for i in filtered_bases]
-        vxc = [i.vx for i in filtered_bases]
-        vyc = [i.vy for i in filtered_bases]
-        vzc = [i.vz for i in filtered_bases]
-        print("# points: " + str(len(filtered_bases)))
-        # Add points to graph
-        ax.scatter(xc, yc, zc, c='r', marker='o')
-        ax.set_xlabel('X Label')
-        ax.set_ylabel('Y Label')
-        ax.set_zlabel('Z Label')
-        # Add vectors to graph
-        ax.quiver(xc, yc, zc, [vxc[i][0]/vec_scale for i in range(len(vxc))], [vxc[i][1]/vec_scale for i in range(len(vxc))], [vxc[i][2]/vec_scale for i in range(len(vxc))], color="red", arrow_length_ratio=0.5)
-        ax.quiver(xc, yc, zc, [vyc[i][0]/vec_scale for i in range(len(vyc))], [vyc[i][1]/vec_scale for i in range(len(vyc))], [vyc[i][2]/vec_scale for i in range(len(vyc))], color="green", arrow_length_ratio=0.5)
-        ax.quiver(xc, yc, zc, [vzc[i][0]/vec_scale for i in range(len(vzc))], [vzc[i][1]/vec_scale for i in range(len(vzc))], [vzc[i][2]/vec_scale for i in range(len(vzc))], color="blue", arrow_length_ratio=0.5)
-        # Add visual plane
-        if plane:
-            poly = [[1,1,0],[-1,1,0],[-1,-1,0],[1,-1,0]]
-            face = a3.art3d.Poly3DCollection([poly])
-            face.set_alpha(0.1)
-            face.set_color(colors.rgb2hex(sp.rand(3)))
-            face.set_edgecolor('k')
-            ax.add_collection3d(face)
-        # Scale
-        ax.auto_scale_xyz([-1, 1], [-1, 1], [-1, 1])
+        if crop_z != None:
+            d = max([self.rx, self.ry, (self.rz - crop_z)/2])
+            z_c = crop_z + (self.rz - crop_z)/2
+            ax.auto_scale_xyz([-d, d], [-d, d], [z_c - d, z_c + d])
+        else:
+            d = max([self.rx, self.ry, self.rz])
+            ax.auto_scale_xyz([-d, d], [-d, d], [-d, d])
         # Call matplotlib plot()
         plt.show()
 
@@ -266,18 +246,11 @@ class EIT(ellipsoid_base):
 
     def tesselate(self, n_times=1):
         self.points, self.faces = self._subdivide(self.points, self.faces, n_times)
-        self._plot_polygon(self.points, self.faces, 0)
-        px, py, pz = self._xyz_list(self.points)
-        self._plot_points(px, py, pz, 0)
-        vs = [basis(i, self._point_normal(i)) for i in self.points]
-        self._plot_bases(vs, 0.15)
-
-        for i in range(len(vs)):
-            a = quaternion()
-            b = a.from_matrix(vs[i].matrix())
+        self.basis = [basis(i, self._point_normal(i)) for i in self.points]
 
 ob = EIT(1,1,3)
 ob.tesselate(2)
+ob.plot(False,True,False,0)
 
 #Objectives:
 #   -From points to robtargets
