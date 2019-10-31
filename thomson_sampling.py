@@ -91,15 +91,20 @@ class ETS(ellipsoid_sampling):
         # Return
         return point(x, y, z)
 
-    def iteration(self, n_iter, pot_i):
-                ###########################
+    def _iterate(self, n_iter, pot_i, stop_threshold):
+        """
+        """
+
+        # Ending contition 1: max cycles reached
         if n_iter == 0:
-            print("EOI")
+            print("Simulation reached maximum number of steps")
             return
+        # Max cycles not reached: compute potential
         else:
             pot_i1 = 0
-            k = 10
+            k = 10 # @todo: not fixed?
             vectors = []
+            # Sum potential of each point w.r.t all the others
             for p1 in self.points:
                 v = vector(0, 0, 0)
                 for p2 in self.points:
@@ -112,27 +117,29 @@ class ETS(ellipsoid_sampling):
                         pot_i1 += 1 / v_diff.norm()
                         v = v + v_final
                 vectors.append(v)
-            print( pot_i, pot_i1)
-            # threshood for potential change
-            if abs(pot_i - pot_i1) < 0.01:
-                print( pot_i, pot_i1)
-                print("THSTOP: " + str(n_iter))
+            # Ending condition 2: potential change below threshold
+            if abs(pot_i - pot_i1) < stop_threshold:
+                print("Simulation converged with " + str(n_iter) + " steps left")
                 return
-            
+            # Continue simulation: move points and repeat
             for i in range(len(self.points)):
+                # Compute point + vector
                 v = vectors[i]
                 p = self.points[i] + point(v[0], v[1], v[2])
+                # Project onto ellipsoid
                 p2 = self._point_ellipsoid_projection(p)
+                # Find unitary displacement vector in spherical coordinates
                 dpsph = self._cart_to_spherical(p2) - self._cart_to_spherical(self.points[i])
                 dvsph = vector(dpsph.lat, dpsph.long, 0).normalized()
+                # Scale vector
                 dvsph = dvsph * dvsph.norm() * k
+                # Move point in spherical coordinates
                 pf = self._cart_to_spherical(self.points[i]) + point(dvsph[0], dvsph[1], 0, 'spherical')
+                # Save changed point in cartesian coordinates
                 pf = self._spherical_to_cart(pf)
                 self.points[i] = pf
-
-            return self.iteration(n_iter - 1, pot_i1)
-
-        ############################
+            # Recursive iteration
+            return self._iterate(n_iter - 1, pot_i1, stop_threshold)
 
     def _vector_plane_projection(self, v, n):
         """ Project vector v onto plane with normal n. """
@@ -140,16 +147,18 @@ class ETS(ellipsoid_sampling):
         v_proj = v + n * (v * n / n.norm())
         return v_proj
 
-    def sample(self, n_points=50):
+    def sample(self, n_points=50, n_iterations=100, stop_threshold=0.01):
         self.points = self._random_distribution(n_points)
+        self._iterate(n_iterations, n_points*100, stop_threshold)
         self.basis = [basis(i, self._point_normal(i)) for i in self.points]
 
 ob = ETS(1,1,1)
 ob.sample(100)
-ob.plot(True,False,False)
-ob.iteration(50, 100000)
-ob.plot(True,False,False)
+ob.plot(True,True,False)
 
 #Objectives:
 #   -From points to robtargets
 # ¿Qué herramienta y qué workboject se usa? Pör ahora los puntos están centrados en la mesa.
+
+# @todo: fix initial orientation to avoid randomness between runs with same number of points
+# @todo: implement a stopping criterion to detect stable oscillation
