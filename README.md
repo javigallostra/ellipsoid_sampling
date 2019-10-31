@@ -13,6 +13,7 @@ The following list shows the implemented and WIP methods.
 
 - [x] **Ichosaedron** sample a unit sphere using the vertices of a regular ichosaedron, subdivide its edges a defined number of times, and project the resulting points onto the ellipsoid
 - [x] **Fibonacci Spiral** sample a unit sphere using a Fibonacci Spiral and an arbitrary number of points, and project the resulting points onto the ellipsoid
+- [ ] **Thomson Problem** sample a unit sphere by simulating the behavior of an arbitrary number of atoms lying on the surface of the sphere.
 
 ## sample results
 Ellipsoid with "radii" (1,1,3) subdivided twice and tesselated.
