@@ -61,6 +61,7 @@ class point:
             self.x += p2.x
             self.y += p2.y
             self.z += p2.z
+        return self
 
     def __sub__(self, p2):
 
@@ -87,6 +88,7 @@ class point:
             self.x -= p2.x
             self.y -= p2.y
             self.z -= p2.z
+        return self
 
     def __mul__(self, b):
         """ Multiply by a scalar."""
@@ -116,6 +118,8 @@ class point:
             self.x *= b
             self.y *= b
             self.z *= b
+        # Return
+        return self
 
     def __truediv__(self, b):
         """ Divide by a scalar."""
@@ -151,6 +155,8 @@ class point:
             self.x /= b
             self.y /= b
             self.z /= b
+        # Return
+        return self
 
     def __eq__(self, p2):
         """ Compare for equality."""

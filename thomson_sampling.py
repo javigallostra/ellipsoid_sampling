@@ -152,10 +152,6 @@ class ETS(ellipsoid_sampling):
         self._iterate(n_iterations, n_points*100, stop_threshold)
         self.basis = [basis(i, self._point_normal(i)) for i in self.points]
 
-ob = ETS(1,1,1)
-ob.sample(100)
-ob.plot(True,True,False)
-
 #Objectives:
 #   -From points to robtargets
 # ¿Qué herramienta y qué workboject se usa? Pör ahora los puntos están centrados en la mesa.

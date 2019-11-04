@@ -46,10 +46,6 @@ class EFS(ellipsoid_sampling):
         self.basis = [basis(p, self._point_normal(p)) for p in self.points]
         self.faces = [] # @todo: maybe implement a method to make a mesh
 
-ob = EFS(1,2,1)
-ob.sample(100)
-ob.plot(False,True,False,0)
-
 #Objectives:
 #   -From points to robtargets
 # ¿Qué herramienta y qué workboject se usa? Pör ahora los puntos están centrados en la mesa.

@@ -42,11 +42,45 @@ class basis:
         self.vx = self.vz*(self.vx*self.vz) + self.vz.cross(self.vx).cross(self.vz)*cos(rad) + self.vz.cross(self.vx)*sin(rad)
         self.vy = self.vz.cross(self.vx)
 
-    def matrix(self):
+    def rotate_y(self, alfa):
+        """ Rotate the basis around its y-vector by alfa degrees."""
+        
+        rad = radians(alfa)
+        # Rotation using angle-axis formula
+        self.vz = self.vy*(self.vz*self.vy) + self.vy.cross(self.vz).cross(self.vy)*cos(rad) + self.vy.cross(self.vz)*sin(rad)
+        self.vx = self.vy.cross(self.vz)
+
+    def translate(self, d, axis='z'):
+        """ Translate the basis along one of its axis by d millimeters."""
+
+        if axis == 'x':
+            displacement = self.vx * d
+        elif axis == 'y':
+            displacement = self.vy * d
+        elif axis == 'z':
+            displacement = self.vz * d
+        else:
+            raise ValueError("Unknown axis name: " + str(axis))
+        self.origin += displacement
+
+    def matrix(self, transpose=True):
         """ Get the matrix representation of the basis orientation.
 
         The matrix is returned as a list of vectors.
         """
 
-        matrix = [vector(self.vx), vector(self.vy), vector(self.vz)]
-        return matrix
+        m = [vector(self.vx), vector(self.vy), vector(self.vz)]
+        if transpose:
+            mt = [[0,0,0],[0,0,0],[0,0,0]]
+            mt[0][0] = m[0][0]
+            mt[1][1] = m[1][1]
+            mt[2][2] = m[2][2]
+            mt[0][1] = m[1][0]
+            mt[0][2] = m[2][0]
+            mt[1][0] = m[0][1]
+            mt[1][2] = m[2][1]
+            mt[2][0] = m[0][2]
+            mt[2][1] = m[1][2]
+        else:
+            mt = m
+        return mt
