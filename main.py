@@ -7,11 +7,11 @@ from point_base import point
 from basis_to_rt import *
 
 # configuration
-tcp_tool = vector(0,0,0)#(2000,0,0) #x es -z, y es x, z es -y
+tcp_tool = vector(2000, 5, 463)#(2000,0,0) #x es -z, y es x, z es -y
 part_size = point(425, 425, 1400)
-d_photo = 0
+d_photo = 1000
 method = "fibonacci"
-n_points = 40
+n_points = 5
 ichos_tesselation = 2
 crop_z = 0
 
@@ -36,12 +36,16 @@ ellipsoid.plot(False, True, False, None, True)
 # correct with tcp_tool
 ellipsoid.crop_z(crop_z)
 for b in ellipsoid.basis:
-    b.translate(tcp_tool[1], 'x')
-    b.translate(-tcp_tool[2], 'y')
-    b.translate(-tcp_tool[0], 'z')
+    # upper points
+    if b.origin[2] >= 1000:
+        b.rotate(180, 'z')
+    # camera is 114 on x direction...
+    b.translate(-tcp_tool[0] + 114, 'z')
 
 # plot
 ellipsoid.plot(False, True, False, -1, True)
+
+create_RAPID_module(ellipsoid.basis, "PRUEBA")
 
 # Jugamos con tDynamo:
 #   -mover las bases a lo largo de su eje z la distancia tDynamo_z
@@ -50,3 +54,9 @@ ellipsoid.plot(False, True, False, -1, True)
 #       -no olvidar que V-Stars recomienda girar 90 grados al menos una vez
 
 # -90 y, 90 z
+
+# Si los puntos están entre 270 y 330 grados en esféricas (latitud),
+# hay que girar la mesa...
+
+# Si tenemos el espacio del trabajo del robot (aproximado a una esfera)
+# podemos precalcular si llegará al punto o no
