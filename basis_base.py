@@ -34,21 +34,37 @@ class basis:
         self.vy = self.vz.cross(self.vx).normalized()
         
 
-    def rotate_z(self, alfa):
-        """ Rotate the basis around its z-vector by alfa degrees."""
+    def rotate(self, alfa, axis='z'):
+        """ Rotate the basis around one of its axis by alfa degrees."""
         
         rad = radians(alfa)
+        # Prepare rotation
+        if axis == 'x':
+            a = self.vx
+            b = self.vy
+        elif axis == 'y':
+            a = self.vy
+            b = self.vz
+        elif axis == 'z':
+            a = self.vz
+            b = self.vx
+        else:
+            raise ValueError("Unknown axis: " + str(axis))
         # Rotation using angle-axis formula
-        self.vx = self.vz*(self.vx*self.vz) + self.vz.cross(self.vx).cross(self.vz)*cos(rad) + self.vz.cross(self.vx)*sin(rad)
-        self.vy = self.vz.cross(self.vx)
-
-    def rotate_y(self, alfa):
-        """ Rotate the basis around its y-vector by alfa degrees."""
-        
-        rad = radians(alfa)
-        # Rotation using angle-axis formula
-        self.vz = self.vy*(self.vz*self.vy) + self.vy.cross(self.vz).cross(self.vy)*cos(rad) + self.vy.cross(self.vz)*sin(rad)
-        self.vx = self.vy.cross(self.vz)
+        new_b = a * (b * a) + a.cross(b).cross(a) * cos(rad) + a.cross(b) * sin(rad)
+        new_c = a.cross(new_b)
+        # Save new values
+        if axis == 'x':
+            self.vy = new_b
+            self.vz = new_c
+        elif axis == 'y':
+            self.vx = new_c
+            self.vz = new_b
+        elif axis == 'z':
+            self.vx = new_b
+            self.vy = new_c
+        else:
+            raise ValueError("Unknown axis: " + str(axis))
 
     def translate(self, d, axis='z'):
         """ Translate the basis along one of its axis by d millimeters."""
