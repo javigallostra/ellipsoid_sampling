@@ -22,7 +22,7 @@ class EFS(ellipsoid_sampling):
         to shape the spiral to the desired ellipsoid.
         """
 
-        # Create spiral on unit sphere
+        # Create spiral on unit sphere and project onto ellipsoid
         dlong = math.pi*(3 - math.sqrt(5))
         dz = 2.0 / n_points
         long = 0
@@ -30,14 +30,11 @@ class EFS(ellipsoid_sampling):
         points = []
         for i in range(n_points):
             r = math.sqrt(1-z*z)
-            points.append(point(math.cos(long)*r, math.sin(long)*r, z))
+            p = point(math.cos(long)*r, math.sin(long)*r, z)
+            p = self._point_ellipsoid_projection(p)
+            points.append(p)
             z -=  dz
             long += dlong
-        # Adjust to ellipsoid radii
-        for p in points:
-            p.x *= self.rx
-            p.y *= self.ry
-            p.z *= self.rz
         # Return
         return points
 

@@ -41,3 +41,66 @@ class ellipsoid_base:
         paral = degrees(atan2(p.z, xy))
         
         return point(paral, merid, 0, "spherical")
+
+    def _point_ellipsoid_projection(self, p):
+        """ Project a point onto the ellipsoid surface."""
+        
+        # Impossible case: 0,0,0
+        if p.count(0) == 3:
+            x = 0.0
+            y = 0.0
+            z = 0.0
+        # Axial points
+        elif p.count(0) == 2:
+            x = self.rx * p.x / abs(p.x) if p.x else 0.0
+            y = self.ry * p.y / abs(p.y) if p.y else 0.0
+            z = self.rz * p.z / abs(p.z) if p.z else 0.0
+        # Planar points
+        elif p.count(0) == 1:
+            #plane x=0
+            if p.x == 0:
+                x = 0.0
+                #find y
+                dydz = p.y / p.z
+                y_num = self.ry * self.rz * abs(dydz)
+                y_den = sqrt((self.rz * dydz)**2 + self.ry**2)
+                y = y_num/y_den
+                if p.y < 0: y = -y
+                #compute z
+                z = y / dydz
+            #plane y=0
+            elif p.y == 0:
+                y = 0.0
+                #find x
+                dxdz = p.x / p.z
+                x_num = self.rx * self.rz * abs(dxdz)
+                x_den = sqrt((self.rz * dxdz)**2 + self.rx**2)
+                x = x_num / x_den
+                if p.x < 0: x = -x
+                #compute z
+                z = x / dxdz
+            #plane z=0
+            elif p.z == 0:
+                z = 0.0
+                #find x
+                dxdy = p.x / p.y
+                x_num = self.rx * self.ry * abs(dxdy)
+                x_den = sqrt((self.ry * dxdy)**2 + self.rx**2)
+                x = x_num / x_den
+                if p.x < 0: x = -x
+                #compute z
+                y = x / dxdy
+        # Quadrant points
+        else:
+            #find x
+            dxdy = p.x / p.y
+            dxdz = p.x / p.z
+            x_num = self.rx * self.ry  *self.rz * abs(dxdy * dxdz)
+            x_den = sqrt((dxdy * self.ry * dxdz * self.rz)**2 + (self.rx * dxdz * self.rz)**2 + (self.rx * dxdy * self.ry)**2)
+            x = x_num / x_den
+            if p.x < 0: x = -x
+            #compute y, z
+            y = x / dxdy
+            z = x / dxdz
+        # Return
+        return point(x, y, z)
