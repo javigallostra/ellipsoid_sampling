@@ -4,9 +4,9 @@ from point_base import point
 from vector_base import vector
 from basis_base import basis
 from quaternion_base import quaternion
-from ellipsoid_sampling import ellipsoid_sampling
+from fibonacci_sampling import EFS
 
-class ETS(ellipsoid_sampling):
+class ETS(EFS):
     """ Ellipsoidal Thomson Simulation.
 
     """
@@ -40,7 +40,7 @@ class ETS(ellipsoid_sampling):
         # Max cycles not reached: compute potential
         else:
             pot_i1 = 0
-            k = 10 # @todo: not fixed?
+            k = 1 # @todo: not fixed?
             vectors = []
             # Sum potential of each point w.r.t all the others
             for p1 in self.points:
@@ -55,6 +55,7 @@ class ETS(ellipsoid_sampling):
                         pot_i1 += 1 / v_diff.norm()
                         v = v + v_final
                 vectors.append(v)
+            print(pot_i1)
             # Ending condition 2: potential change below threshold
             if abs(pot_i - pot_i1) < stop_threshold:
                 print("Simulation converged with " + str(n_iter) + " steps left")
@@ -86,9 +87,18 @@ class ETS(ellipsoid_sampling):
         return v_proj
 
     def sample(self, n_points=50, n_iterations=100, stop_threshold=0.01):
-        self.points = self._random_distribution(n_points)
+        # 1 - unit sphere
+        ellipsoid_radii = [self.rx, self.ry, self.rz]
+        self.rx = self.ry = self.rz = 1
+        # 2 - iterate
+        self.points = self._spiral(n_points)
         self._iterate(n_iterations, n_points*100, stop_threshold)
+        # 3 - backproject
+        self.rx, self.ry, self.rz = ellipsoid_radii
+        for i in range(len(self.points)):
+            self.points[i] = self._point_ellipsoid_projection(self.points[i])
         self.basis = [basis(i, self._point_normal(i)) for i in self.points]
+        self.faces = [] # @todo: maybe implement a method to make a mesh
 
 #Objectives:
 #   -From points to robtargets

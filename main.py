@@ -10,8 +10,8 @@ from basis_to_rt import *
 tcp_tool = vector(2000, 5, 463) #x es -z, y es x, z es -y
 part_size = point(425, 425, 1400)
 d_photo = 750
-method = "fibonacci"
-n_points = 40
+method = "thomson"
+n_points = 5
 ichos_tesselation = 2
 crop_z = 0
 
@@ -49,7 +49,7 @@ for b in ellipsoid.basis:
 # plot
 ellipsoid.plot(False, True, False, -1, True)
 
-create_RAPID_module(ellipsoid.basis, "PRUEBA")
+#create_RAPID_module(ellipsoid.basis, "PRUEBA")
 
 # -no olvidar que V-Stars recomienda girar 90 grados al menos una vez
 
