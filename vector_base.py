@@ -94,6 +94,8 @@ class vector:
         # Scalar multiplication
         for i in range(len(self.values)):
             self.values[i] *= b
+        # Return
+        return self
 
     def __add__(self, b):
         """ Add a vector to another."""
@@ -114,6 +116,8 @@ class vector:
         # @todo que pasa cuando dimself != dimb...
         for i in range(max(len(self.values), len(b.values))):
             self.values[i] += b[i]
+        # Return
+        return self
 
     def __sub__(self, b):
         """ Substract a vector to another."""
@@ -124,7 +128,8 @@ class vector:
     def __isub__(self, b):
         """ Substract another vector from itself."""
 
-        self.__iadd__(b * -1)
+        # Return
+        return self.__iadd__(b * -1)
 
     def __len__(self):
 

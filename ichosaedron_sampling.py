@@ -5,7 +5,7 @@ from basis_base import basis
 from quaternion_base import quaternion
 from ellipsoid_sampling import ellipsoid_sampling
 
-class EIT(ellipsoid_sampling):
+class EIS(ellipsoid_sampling):
     """ Ellipsoidal ichosaedron tesselation.
 
     Create an ellipsoidal ichosaedron and perform
@@ -160,10 +160,6 @@ class EIT(ellipsoid_sampling):
     def sample(self, n_times=1):
         self.points, self.faces = self._subdivide(self.points, self.faces, n_times)
         self.basis = [basis(i, self._point_normal(i)) for i in self.points]
-
-ob = EIT(1,1,3)
-ob.sample(2)
-ob.plot(False,True,False,0)
 
 #Objectives:
 #   -From points to robtargets

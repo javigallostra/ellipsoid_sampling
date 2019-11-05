@@ -34,19 +34,69 @@ class basis:
         self.vy = self.vz.cross(self.vx).normalized()
         
 
-    def rotate_z(self, alfa):
-        """ Rotate the basis around its z-vector by alfa degrees."""
+    def rotate(self, alfa, axis='z'):
+        """ Rotate the basis around one of its axis by alfa degrees."""
         
         rad = radians(alfa)
+        # Prepare rotation
+        if axis == 'x':
+            a = self.vx
+            b = self.vy
+        elif axis == 'y':
+            a = self.vy
+            b = self.vz
+        elif axis == 'z':
+            a = self.vz
+            b = self.vx
+        else:
+            raise ValueError("Unknown axis: " + str(axis))
         # Rotation using angle-axis formula
-        self.vx = self.vz*(self.vx*self.vz) + self.vz.cross(self.vx).cross(self.vz)*cos(rad) + self.vz.cross(self.vx)*sin(rad)
-        self.vy = self.vz.cross(self.vx)
+        new_b = a * (b * a) + a.cross(b).cross(a) * cos(rad) + a.cross(b) * sin(rad)
+        new_c = a.cross(new_b)
+        # Save new values
+        if axis == 'x':
+            self.vy = new_b
+            self.vz = new_c
+        elif axis == 'y':
+            self.vx = new_c
+            self.vz = new_b
+        elif axis == 'z':
+            self.vx = new_b
+            self.vy = new_c
+        else:
+            raise ValueError("Unknown axis: " + str(axis))
 
-    def matrix(self):
+    def translate(self, d, axis='z'):
+        """ Translate the basis along one of its axis by d millimeters."""
+
+        if axis == 'x':
+            displacement = self.vx * d
+        elif axis == 'y':
+            displacement = self.vy * d
+        elif axis == 'z':
+            displacement = self.vz * d
+        else:
+            raise ValueError("Unknown axis name: " + str(axis))
+        self.origin += displacement
+
+    def matrix(self, transpose=True):
         """ Get the matrix representation of the basis orientation.
 
         The matrix is returned as a list of vectors.
         """
 
-        matrix = [vector(self.vx), vector(self.vy), vector(self.vz)]
-        return matrix
+        m = [vector(self.vx), vector(self.vy), vector(self.vz)]
+        if transpose:
+            mt = [[0,0,0],[0,0,0],[0,0,0]]
+            mt[0][0] = m[0][0]
+            mt[1][1] = m[1][1]
+            mt[2][2] = m[2][2]
+            mt[0][1] = m[1][0]
+            mt[0][2] = m[2][0]
+            mt[1][0] = m[0][1]
+            mt[1][2] = m[2][1]
+            mt[2][0] = m[0][2]
+            mt[2][1] = m[1][2]
+        else:
+            mt = m
+        return mt

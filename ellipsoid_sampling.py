@@ -17,7 +17,7 @@ class ellipsoid_sampling(ellipsoid_base):
         self.basis = []
         self.faces = []
 
-    def plot(self, points=True, basis=False, faces=False, crop_z=None):
+    def plot(self, points=True, basis=False, faces=False, crop_z=None, verbose=False):
         """ Plot the sampled ellipsoid."""
 
         # Create axes
@@ -27,6 +27,7 @@ class ellipsoid_sampling(ellipsoid_base):
             # Crop
             if crop_z != None:
                 points_crop = [p for p in self.points if p[2] >=crop_z]
+                if verbose: print("# points: " + str(len(points_crop)))
             else:
                 points_crop = self.points
             # Prepare
@@ -38,6 +39,7 @@ class ellipsoid_sampling(ellipsoid_base):
             # Crop
             if crop_z != None:
                 basis_crop = [b for b in self.basis if b.origin[2] >= crop_z]
+                if verbose: print("# basis: " + str(len(basis_crop)))
             else:
                 basis_crop = self.basis
             # Prepare
@@ -48,7 +50,7 @@ class ellipsoid_sampling(ellipsoid_base):
             vy = [b.vy for b in basis_crop]
             vz = [b.vz for b in basis_crop]
             # Plot
-            scale = 5
+            scale = 5/max([self.rx, self.ry, self.rz])
             ax.quiver(px, py, pz, [v[0]/scale for v in vx], [v[1]/scale for v in vx], [v[2]/scale for v in vx], color="red", arrow_length_ratio=0.5)
             ax.quiver(px, py, pz, [v[0]/scale for v in vy], [v[1]/scale for v in vy], [v[2]/scale for v in vy], color="green", arrow_length_ratio=0.5)
             ax.quiver(px, py, pz, [v[0]/scale for v in vz], [v[1]/scale for v in vz], [v[2]/scale for v in vz], color="blue", arrow_length_ratio=0.5)
@@ -97,3 +99,15 @@ class ellipsoid_sampling(ellipsoid_base):
         y = [vi[1] for vi in vs]
         z = [vi[2] for vi in vs]
         return x,y,z
+
+    def crop_z(self, crop_z):
+        """ Remove the elements below the given z."""
+
+        new_faces = []
+        for f in self.faces:
+            poly=[self.points[f[0]], self.points[f[1]], self.points[f[2]]]
+            if (poly[0][2]>=crop_z and poly[1][2]>=crop_z and poly[2][2]>=crop_z):
+                new_faces.append(f)
+        self.faces = new_faces
+        self.points = [p for p in self.points if p[2] >= crop_z]
+        self.basis = [b for b in self.basis if b.origin[2] >= crop_z]
