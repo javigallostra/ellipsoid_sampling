@@ -6,25 +6,37 @@ from quaternion_base import quaternion
 from ellipsoid_sampling import ellipsoid_sampling
 
 class EIS(ellipsoid_sampling):
-    """ Ellipsoidal ichosaedron tesselation.
+    """ Ellipsoidal Ichosaedron Subdivision.
 
-    Create an ellipsoidal ichosaedron and perform
-    triangular subdivisions (1 to 4) to tesellate its surface.
+    Class to sample an ellipsoid using succesive Ichosaedron
+    Subdivisions. The ichosaedron is created on the ellipsoid
+    using spherical coordinates. Its triangles are then subdivided
+    into four smaller triangles an arbitrary number of times. The
+    vertices of said triangles are the sampled points.
     """
 
     def __init__(self, rx=1, ry=1, rz=1):
+        """ Set the initial parameters and create the regular ichosaedron.
+
+        After getting the ichosaedron points, their orthonormal basis as
+        well as their gathering into faces are computed.
+        """
+        
         super().__init__(rx, ry, rz)
         self.points, self.faces = self._ichosaedron()
         self.basis = [basis(i, self._point_normal(i)) for i in self.points]
 
     def _ichosaedron(self):
-        """ Create a 'regular' ellipsoidal ichosaedron.
+        """ Create a regular ichosaedron backprojected to the ellipsoid.
 
-        Use the radii defined in the constructor
-        to shape the regular ichosaedron to the desired
-        elipsoid.
+        Compute the ichosaedron points with spherical coordinates and
+        backproject them to the ellipsoida surface in the cartesian space.
+        After that, group the ichosaedron points into faces.
+
+        Return a tuple with the list of points and the list of faces.
         """
-        
+
+        # @ todo: check if we can use bakcprojection instead of cartesian to spherical
         # Create points in order (spherical coord)
         p0 = point(90, 0, None, "spherical")
         p1_5 = [point(26.57, 2*i*36, None, "spherical") for i in range(0,5)]
@@ -48,84 +60,32 @@ class EIS(ellipsoid_sampling):
         faces.append([9,10,1])
         faces.append([10,1,2])
         # Return
-        return points, faces
+        return (points, faces)
 
     def _point_interpolation(self, p1, p2):
-        """ Point interpolation function.
+        """ Find the middle ellipsoidal point between two points.
 
-        Find the point equidistant to p1,p2
-        lying on the ellipsoid.
+        Compute the middle point of vector p1-p2 and backproject
+        it to the ellipsoidal surface.
+
+        Return the resulting point.
         """
 
         # Find the middle point of p1-p2
         p = p1 + (p2 - p1)/2
         # Project the point onto the ellipsoid
-        # Impossible case: 0,0,0
-        if p.count(0) == 3:
-            x = 0.0
-            y = 0.0
-            z = 0.0
-        # Axial points
-        elif p.count(0) == 2:
-            x = self.rx * p.x / abs(p.x) if p.x else 0.0
-            y = self.ry * p.y / abs(p.y) if p.y else 0.0
-            z = self.rz * p.z / abs(p.z) if p.z else 0.0
-        # Planar points
-        elif p.count(0) == 1:
-            #plane x=0
-            if p.x == 0:
-                x = 0.0
-                #find y
-                dydz = p.y / p.z
-                y_num = self.ry * self.rz * abs(dydz)
-                y_den = math.sqrt((self.rz * dydz)**2 + self.ry**2)
-                y = y_num/y_den
-                if p.y < 0: y = -y
-                #compute z
-                z = y / dydz
-            #plane y=0
-            elif p.y == 0:
-                y = 0.0
-                #find x
-                dxdz = p.x / p.z
-                x_num = self.rx * self.rz * abs(dxdz)
-                x_den = math.sqrt((self.rz * dxdz)**2 + self.rx**2)
-                x = x_num / x_den
-                if p.x < 0: x = -x
-                #compute z
-                z = x / dxdz
-            #plane z=0
-            elif p.z == 0:
-                z = 0.0
-                #find x
-                dxdy = p.x / p.y
-                x_num = self.rx * self.ry * abs(dxdy)
-                x_den = math.sqrt((self.ry * dxdy)**2 + self.rx**2)
-                x = x_num / x_den
-                if p.x < 0: x = -x
-                #compute z
-                y = x / dxdy
-        # Quadrant points
-        else:
-            #find x
-            dxdy = p.x / p.y
-            dxdz = p.x / p.z
-            x_num = self.rx * self.ry  *self.rz * abs(dxdy * dxdz)
-            x_den = math.sqrt((dxdy * self.ry * dxdz * self.rz)**2 + (self.rx * dxdz * self.rz)**2 + (self.rx * dxdy * self.ry)**2)
-            x = x_num / x_den
-            if p.x < 0: x = -x
-            #compute y, z
-            y = x / dxdy
-            z = x / dxdz
+        p = self._point_ellipsoid_projection(p)
         # Return
-        return point(x, y, z)
+        return p
 
     def _subdivide(self, points, faces, times=1):
-        """ Recursive triangular subdivision.
+        """ Recursively subdivide the triangles.
 
         Subdivide each surface triangle into 4
         a defined number of times to obtain a fine
         triangular tesselation.
+
+        Return a tuple with the list of points and the list of faces.
         """
 
         # End case
@@ -158,9 +118,12 @@ class EIS(ellipsoid_sampling):
             return self._subdivide(new_points, new_faces, times-1)
 
     def sample(self, n_times=1):
+        """ Sample the ellipsoid by succesive Ichosaedron Subdivisions.
+
+        Get the points and compute their orthogonal basis.
+
+        Return nothing.
+        """
         self.points, self.faces = self._subdivide(self.points, self.faces, n_times)
         self.basis = [basis(i, self._point_normal(i)) for i in self.points]
-
-#Objectives:
-#   -From points to robtargets
-# ¿Qué herramienta y qué workboject se usa? Pör ahora los puntos están centrados en la mesa.
+        return

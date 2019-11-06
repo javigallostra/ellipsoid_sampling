@@ -7,17 +7,18 @@ from point_base import point
 from basis_to_rt import *
 
 # configuration
-tcp_tool = vector(2000, 5, 463)#(2000,0,0) #x es -z, y es x, z es -y
+tcp_tool = vector(2000, 5, 463) #x es -z, y es x, z es -y
 part_size = point(425, 425, 1400)
-d_photo = 1000
+d_photo = 750
 method = "fibonacci"
-n_points = 5
+n_points = 20
 ichos_tesselation = 2
 crop_z = 0
 
 # compute
 # takes part_size + d_ph as the sphere radius
 radius = part_size + point(1, 1, 1) * d_photo
+print("[MAIN] - Sampling ellipsoid...")
 if method == "fibonacci":
     ellipsoid = EFS(radius[0], radius[1], radius[2])
     ellipsoid.sample(n_points * 2)
@@ -29,34 +30,40 @@ elif method == "thomson":
     ellipsoid.sample(n_points * 2)
 else:
     raise ValueError("Unknown sampling method: " + method)
+print("[MAIN] - Sampled %d points." %(len(ellipsoid.basis)))
 
 # plot
-ellipsoid.plot(False, True, False, None, True)
+print("[MAIN] - Plotting sampled points...")
+ellipsoid.plot(False, True, False, None)
 
+# adjust positions
+print("[MAIN] - Adjusting positions to robot tool...")
 # correct with tcp_tool
+max_base_h = 0
+min_base_h = 0
 ellipsoid.crop_z(crop_z)
 for b in ellipsoid.basis:
-    # upper points
-    if b.origin[2] >= 1000:
-        b.rotate(180, 'z')
     # camera is 114 on x direction...
     b.translate(-tcp_tool[0] + 114, 'z')
+    if b.origin[2] > max_base_h:
+        max_base_h = b.origin[2]
+    elif b.origin[2] < min_base_h:
+        min_base_h = b.origin[2]
+
+# adjust rotation around z based on height
+for b in ellipsoid.basis:
+    b.rotate(-90 * b.origin[2] / max_base_h, 'z')
+print("[MAIN] - Adjusted %d points." %(len(ellipsoid.basis)))
 
 # plot
-ellipsoid.plot(False, True, False, -1, True)
+print("[MAIN] - Plotting adjusted points...")
+ellipsoid.plot(False, True, False, min_base_h)
 
-create_RAPID_module(ellipsoid.basis, "PRUEBA")
+# export to RAPID
+print("[MAIN] - Exporting points to RAPID code...")
+#create_RAPID_module(ellipsoid.basis, "PRUEBA")
 
-# Jugamos con tDynamo:
-#   -mover las bases a lo largo de su eje z la distancia tDynamo_z
-#   -orientación de la herramienta:
-#       -a partir de una z determinada debería girar 180 grados
-#       -no olvidar que V-Stars recomienda girar 90 grados al menos una vez
+print("[MAIN] - Finished.")
 
-# -90 y, 90 z
-
-# Si los puntos están entre 270 y 330 grados en esféricas (latitud),
-# hay que girar la mesa...
-
-# Si tenemos el espacio del trabajo del robot (aproximado a una esfera)
-# podemos precalcular si llegará al punto o no
+# -no olvidar que V-Stars recomienda girar 90 grados al menos una vez
+# -emilio recomienda girar otra vez

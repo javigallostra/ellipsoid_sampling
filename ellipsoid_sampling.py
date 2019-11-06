@@ -12,13 +12,28 @@ class ellipsoid_sampling(ellipsoid_base):
     """
 
     def __init__(self, rx=1, ry=1, rz=1):
+        """ Set the initial parameters.
+
+        Create empty lists of basis and faces.
+
+        Return nothing.
+        """
+        
         super().__init__(rx,ry,rz)
-        self.points = []
         self.basis = []
         self.faces = []
+        return
 
-    def plot(self, points=True, basis=False, faces=False, crop_z=None, verbose=False):
-        """ Plot the sampled ellipsoid."""
+    def plot(self, points=True, basis=False, faces=False, crop_z=None):
+        """ Plot the ellipsoid.
+
+        Plot the points, basis and/or faces according
+        to the selected options. If crop_z is given, draw
+        a plane at the same height and do not plot the
+        elements below the plane.
+
+        Return nothing.
+        """
 
         # Create axes
         ax = a3.Axes3D(plt.figure())
@@ -27,7 +42,6 @@ class ellipsoid_sampling(ellipsoid_base):
             # Crop
             if crop_z != None:
                 points_crop = [p for p in self.points if p[2] >=crop_z]
-                if verbose: print("# points: " + str(len(points_crop)))
             else:
                 points_crop = self.points
             # Prepare
@@ -39,7 +53,6 @@ class ellipsoid_sampling(ellipsoid_base):
             # Crop
             if crop_z != None:
                 basis_crop = [b for b in self.basis if b.origin[2] >= crop_z]
-                if verbose: print("# basis: " + str(len(basis_crop)))
             else:
                 basis_crop = self.basis
             # Prepare
@@ -91,17 +104,26 @@ class ellipsoid_sampling(ellipsoid_base):
             ax.auto_scale_xyz([-d, d], [-d, d], [-d, d])
         # Call matplotlib plot()
         plt.show()
+        return
 
     def _xyz_list(self, vs):
-        """ Transform a nx3 array into 3 nx1 arrays."""
+        """ Transform a list of 3D points into three X, Y, Z lists.
+
+        Return a tuple with the X, Y, Z, lists.
+        """
         
         x = [vi[0] for vi in vs]
         y = [vi[1] for vi in vs]
         z = [vi[2] for vi in vs]
-        return x,y,z
+        return (x,y,z)
 
     def crop_z(self, crop_z):
-        """ Remove the elements below the given z."""
+        """ Remove the elements below the given z.
+
+        Remove points, faces and basis.
+
+        Return nothing.
+        """
 
         new_faces = []
         for f in self.faces:
@@ -111,3 +133,4 @@ class ellipsoid_sampling(ellipsoid_base):
         self.faces = new_faces
         self.points = [p for p in self.points if p[2] >= crop_z]
         self.basis = [b for b in self.basis if b.origin[2] >= crop_z]
+        return
