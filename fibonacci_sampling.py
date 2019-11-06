@@ -6,20 +6,31 @@ from quaternion_base import quaternion
 from ellipsoid_sampling import ellipsoid_sampling
 
 class EFS(ellipsoid_sampling):
-    """ Ellipsoidal fibonacci spiral.
+    """ Ellipsoidal Fibonacci Spiral.
 
-    Create an ellipsoidal distribution of N points
-    using the Fibonacci Sprial.
+    Class to sample an ellipsoid with an arbitrary
+    number of points. The points are distributed using
+    the Fibonacci Spiral algorithm on a unit sphere
+    and then backprojected to the ellipsoidal surface.
     """
 
     def __init__(self, rx=1, ry=1, rz=1):
+        """ Set the initial parameters.
+
+        Return nothing.
+        """
+        
         super().__init__(rx,ry,rz)
+        return
 
     def _spiral(self, n_points):
-        """ Create a 'regular' ellipsoidal ichosaedron.
+        """ Distribute n_points on a Fibonacci Spiral.
 
-        Use the radii defined in the constructor
-        to shape the spiral to the desired ellipsoid.
+        The spiral is created on a unit sphere and then
+        the points are backprojected to the ellipsoidal
+        surface.
+
+        Return the list of points.
         """
 
         # Create spiral on unit sphere and project onto ellipsoid
@@ -39,10 +50,14 @@ class EFS(ellipsoid_sampling):
         return points
 
     def sample(self, n_points):
+        """ Sample the ellipsoid using the Fibonacci Spiral algorithm.
+
+        Get the points and compute their orthogonal basis.
+
+        Return nothing.
+        """
+        
         self.points = self._spiral(n_points)
         self.basis = [basis(p, self._point_normal(p)) for p in self.points]
         self.faces = [] # @todo: maybe implement a method to make a mesh
-
-#Objectives:
-#   -From points to robtargets
-# ¿Qué herramienta y qué workboject se usa? Pör ahora los puntos están centrados en la mesa.
+        return

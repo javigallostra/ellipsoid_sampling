@@ -3,47 +3,77 @@ from point_base import point
 from vector_base import vector
 
 class ellipsoid_base:
+    """ Basic ellipsoid class.
+
+    Provides methods to compute the normal vector
+    of a surface points, to switch a point between cartesian
+    and spherical coordinates, and to project any point in
+    space onto the ellipsoidal surface.
+    """
 
     def __init__(self, rx=1, ry=1, rz=1):
+        """ Set the initial parameters.
+
+        Create an empty list of points.
+
+        Return nothing.
+        """
+        
         self.rx = rx
         self.ry = ry
         self.rz = rz
         self.points = []
+        return
 
     def _point_normal(self, p):
         """ Compute the normal of an ellipsoid surface point.
 
         The normal is unitary and facing inwards the ellipsoid.
+
+        Return the resulting normal vector.
         """
         
+        # Compute vector and normalize
         vx = 2 * p.x / (self.rx**2)
         vy = 2 * p.y / (self.ry**2)
         vz = 2 * p.z / (self.rz**2)
         normal = vector(vx, vy, vz).normalized()
-        
+        # return
         return normal
 
     def _spherical_to_cart(self, p):
-        """ Spherical to cartesian point mapping."""
-        
+        """ Spherical to cartesian point mapping.
+
+        Return the resulting point.
+        """
+
+        # Compute coordinates
         z = self.rz * sin(radians(p.lat))
         xy = cos(radians(p.lat))
         x = self.rx * xy * cos(radians(p.long))
         y = self.ry * xy * sin(radians(p.long))
-        
+        # Return
         return point(x, y, z)
 
     def _cart_to_spherical(self, p):
-        """ Cartesian to spherical point mapping."""
+        """ Cartesian to spherical point mapping.
 
+        Return the resulting point.
+        """
+
+        # Compute coordinates
+        # @todo: check that lat is lat and long is long...
         xy = sqrt(p.x**2 + p.y**2)
         merid = degrees(atan2(p.y, p.x))
         paral = degrees(atan2(p.z, xy))
-        
+        # Return
         return point(paral, merid, 0, "spherical")
 
     def _point_ellipsoid_projection(self, p):
-        """ Project a point onto the ellipsoid surface."""
+        """ Project a point onto the ellipsoid surface.
+
+        Return the resulting point.
+        """
         
         # Impossible case: 0,0,0
         if p.count(0) == 3:

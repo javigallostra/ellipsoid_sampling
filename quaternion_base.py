@@ -1,13 +1,21 @@
 from math import sqrt
 
 class quaternion:
+    """ Basic quaternion class.
+
+    Implements representation methods, length, getter,
+    iterators, normalization methods and a method to
+    create a quaternion from a rotation matrix.
+    """
 
     def __init__(self, *args):
-        """ Initialize a quaternion.
+        """ Set the initial parameters.
 
         Each initialization value corresponds to
         the vector value in the given dimension.
         Can be initialized with a list or tuple.
+
+        Return nothing.
         """
         
         self.values = []
@@ -63,6 +71,8 @@ class quaternion:
                     # Valid scalar
                     else:
                         self.values.append(float(arg))
+        # Return
+        return
                         
     def __getitem__(self, i):
         """ Get a quaternion value.
@@ -70,6 +80,8 @@ class quaternion:
         Only non-negative integer indices are allowed.
         If the index is higher than the 3,
         an error will be raised.
+
+        Return the requested value.
         """
         
         # Invalid argument type
@@ -87,23 +99,28 @@ class quaternion:
         return result
 
     def __len__(self):
+        """ Return the length of the quaternion."""
 
         return len(self.values)
 
     def __str__(self):
+        """ Return the string representation of the quaternion."""
         
         return str(self.values)
 
     def __repr__(self):
+        """ Return the representation of the quaternion."""
         
         return str(self.values)
 
     def __iter__(self):
+        """ Return itself as an iterator."""
         
         self.iter_n = 0
         return self
 
     def __next__(self):
+        """ Return the next element of the quaternion iterator."""
         
         if self.iter_n < len(self.values):
             element = self.values[self.iter_n]
@@ -113,25 +130,35 @@ class quaternion:
             raise StopIteration
 
     def norm(self):
-        """ Compute the quaternion 2-norm."""
+        """ Return the quaternion 2-norm."""
 
         return sqrt(sum([i**2 for i in self.values]))
 
     def normalize(self):
-        """ Normalize the quaternion."""
+        """ Normalize the quaternion.
+
+        Return nothing.
+        """
 
         n = self.norm()
         for i in range(len(self.values)):
             self.values[i] /= n
+        return
 
     def normalized(self):
-        """ Compute the normalized quaternion."""
+        """ Compute the normalized quaternion.
+
+        Return a new quaternion.
+        """
 
         n = self.norm()
         return quaternion([i/n for i in self.values])
 
     def from_matrix(self, matrix):
-        """ Compute a quaternion from an orthonormal rotation matrix."""
+        """ Compute a quaternion from an orthonormal rotation matrix.
+
+        Return the new quaternion.
+        """
         
         m = matrix
         # Compute trace

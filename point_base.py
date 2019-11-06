@@ -1,4 +1,11 @@
 class point:
+    """ Basic 3D point class.
+
+    Implements most of the arithmetic operators,
+    the getting method and the representation methods.
+    Also implements a 'count' method for counting
+    instances of a certain scalar in the point values.
+    """
 
     def __init__(self, x=0, y=0, z=0, cs="cartesian"):
         self.cs = cs
@@ -19,6 +26,8 @@ class point:
         Only non-negative integer indices are allowed.
         If the index is higher than the 2,
         an error will be raised.
+
+        Return the requested element.
         """
         
         # Invalid argument type
@@ -37,6 +46,10 @@ class point:
         return result
 
     def __add__(self, p2):
+        """ Add a point.
+
+        Return a new point.
+        """
 
         if type(p2) != type(self):
             raise TypeError("Unsupported operand types: %s and %s" %(type(self), type(p2)))
@@ -49,6 +62,10 @@ class point:
         return result
 
     def __iadd__(self, p2):
+        """ Add a point to itself.
+
+        Return itself.
+        """
 
         if type(p2) != type(self):
             raise TypeError("Unsupported operand types: %s and %s" %(type(self), type(p2)))
@@ -64,6 +81,10 @@ class point:
         return self
 
     def __sub__(self, p2):
+        """ Substract a point.
+
+        Return a new point.
+        """
 
         if type(p2) != type(self):
             raise TypeError("Unsupported operand types: %s and %s" %(type(self), type(p2)))
@@ -76,6 +97,10 @@ class point:
         return result
 
     def __isub__(self, p2):
+        """ Substract a point from itself.
+
+        Return itself.
+        """
 
         if type(p2) != type(self):
             raise TypeError("Unsupported operand types: %s and %s" %(type(self), type(p2)))
@@ -91,7 +116,10 @@ class point:
         return self
 
     def __mul__(self, b):
-        """ Multiply by a scalar."""
+        """ Multiply by a scalar.
+
+        Return a new point.
+        """
                  
         # Invalid argument type
         if type(b) not in [type(0), type(0.0)]:
@@ -105,7 +133,10 @@ class point:
         return result
 
     def __imul__(self,b):
-        """ Multiply itself by a scalar."""
+        """ Multiply itself by a scalar.
+
+        Return itself.
+        """
         
         # Invalid argument type
         if type(b) not in [type(0), type(0.0)]:
@@ -122,7 +153,10 @@ class point:
         return self
 
     def __truediv__(self, b):
-        """ Divide by a scalar."""
+        """ Divide by a scalar.
+
+        Return a new point.
+        """
         
         # Invalid argument type
         if type(b) not in [type(0), type(0.0)]:
@@ -139,7 +173,10 @@ class point:
         return result
 
     def __idiv__(self, b):
-        """ Divide itself by a scalar."""
+        """ Divide itself by a scalar.
+
+        Return itself.
+        """
         
         # Invalid argument type
         if type(b) not in [type(0), type(0.0)]:
@@ -159,24 +196,22 @@ class point:
         return self
 
     def __eq__(self, p2):
-        """ Compare for equality."""
+        """ Compare for equality.
 
-        if type(p2) != type(self):
-            return False
-        elif p2.cs != self.cs:
-            return False
-        elif self.cs == "spherical":
-            if self.lat == p2.lat and self.long == p2.long:
-                return True
+        Return a boolean.
+        """
+
+        if (type(p2) == type(self)) and (p2.cs == self.cs):
+            if self.cs == "spherical":
+                if self.lat == p2.lat and self.long == p2.long:
+                    return True
             else:
-                return False
-        else:
-            if self.x == p2.x and self.y == p2.y and self.z == p2.z:
-                return True
-            else:
-                return False
+                if self.x == p2.x and self.y == p2.y and self.z == p2.z:
+                    return True
+        return False
             
     def __str__(self):
+        """ Return a string representation of the point."""
 
         if self.cs == "spherical":
             return str([self.lat, self.long])
@@ -184,10 +219,15 @@ class point:
             return str([self.x, self.y, self.z])
 
     def __repr__(self):
+        """ Return the representation of the point."""
         
         return self.__str__()
 
     def count(self, b):
+        """ Count the occurences of a certain value in the point elements.
+
+        Return the number of occurrences.
+        """
 
         # Invalid argument type
         if type(b) not in [type(0), type(0.0)]:
