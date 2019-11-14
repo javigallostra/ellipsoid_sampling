@@ -10,7 +10,7 @@ class basis:
     basis.
     """
 
-    def __init__(self, origin = 0, vz = 0):
+    def __init__(self, origin = 0, vz = 0, vx = 0, vy = 0):
         """ Set the origin and the basis x, y, z vectors.
 
         If an initial z vector is given, the basis is
@@ -30,8 +30,12 @@ class basis:
             self.vx = vector(1,0,0)
             self.vy = vector(0,1,0)
             self.vz = vector(0,0,1)
-        else:
+        elif not vx:
             self.set_vz(vz)
+        else:
+            self.vz = vector(vz).normalized()
+            self.vx = vector(vx).normalized()
+            self.vy = vector(vy).normalized()
         # Return
         return
 

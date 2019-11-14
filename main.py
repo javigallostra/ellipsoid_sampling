@@ -8,11 +8,6 @@ from basis_to_rt import *
 
 # configuration
 SAVE = True
-tcp_tool = vector_tool0_to_tdyn(vector(1500,-120,280)) # nos movemos en tdyn
-real_tcp_approx = vector_tool0_to_tdyn(vector(114, 5, 462.5))
-
-print(tcp_tool)
-print(real_tcp_approx)
 part_size = point(700, 700, 1400)
 d_photo = 500
 method = "fibonacci"
@@ -44,26 +39,24 @@ ellipsoid.plot(False, True, False, crop_z)
 # adjust positions
 print("[MAIN] - Adjusting positions to robot tool...")
 # correct with tcp_tool
-max_base_h = 0
-min_base_h = 0
+max_base_z = 0
+min_base_z = 0
 ellipsoid.crop_z(crop_z)
 for b in ellipsoid.basis:
-    # adjust program tcp to real tcp
-    b.translate(-real_tcp_approx)
-    b.translate(tcp_tool)
-    if b.origin[2] > max_base_h:
-        max_base_h = b.origin[2]
-    elif b.origin[2] < min_base_h:
-        min_base_h = b.origin[2]
+    # Get maximum and minimum base z values
+    if b.origin[2] > max_base_z:
+        max_base_z = b.origin[2]
+    elif b.origin[2] < min_base_z:
+        min_base_z = b.origin[2]
 
-# adjust rotation around z based on height
+# adjust rotation around z based on z value
 for b in ellipsoid.basis:
-    b.rotate(-90 * b.origin[2] / max_base_h, 'z')
+    b.rotate(-90 * (b.origin[2] - min_base_z) / (max_base_z - min_base_z), 'z')
 print("[MAIN] - Adjusted %d points." %(len(ellipsoid.basis)))
 
 # plot
 print("[MAIN] - Plotting adjusted points...")
-ellipsoid.plot(False, True, False, min_base_h)
+ellipsoid.plot(False, True, False, min_base_z)
 
 # export to RAPID
 if SAVE:
