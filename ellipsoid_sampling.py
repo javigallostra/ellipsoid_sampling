@@ -2,6 +2,7 @@ import mpl_toolkits.mplot3d as a3
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from scipy import rand
+from point_base import point
 from ellipsoid_base import ellipsoid_base
 
 class ellipsoid_sampling(ellipsoid_base):
@@ -133,4 +134,21 @@ class ellipsoid_sampling(ellipsoid_base):
         self.faces = new_faces
         self.points = [p for p in self.points if p[2] >= crop_z]
         self.basis = [b for b in self.basis if b.origin[2] >= crop_z]
+        return
+
+    def add_point(self, b):
+        """ Add a point to the ellipsoid sampling.
+
+        The origin of the new basis must lie on the ellipsoid
+        surface, and its basis z vector must be normal to the
+        surface and outards-facing. The new point's coordinates
+        correspond to the basis origin.
+
+        Return nothing.
+        """
+
+        self.points.append(point(b.origin[0], b.origin[1], b.origin[2]))
+        self.basis.append(b.copy())
+        # @ todo: generate new faces...
+        # Return
         return
