@@ -97,7 +97,7 @@ class basis:
         # Return
         return
 
-    def translate(self, d, axis='z'):
+    def translate_axis(self, d, axis='z'):
         """ Translate the basis along one of its axis by d millimeters.
 
         Return nothing.
@@ -117,6 +117,22 @@ class basis:
         # Return
         return
 
+    def translate(self, v):
+        """ Translate the basis along one vector.
+
+        Return nothing.
+        """
+
+        # Check type
+        if type(v) != type(self.vx):
+            raise TypeError("Only vectors can be used for translation. Use 'translate_axis' for single-axis translation.")
+        # Translate along each axis
+        self.translate_axis(v[0], 'x')
+        self.translate_axis(v[1], 'y')
+        self.translate_axis(v[2], 'z')
+        # Return
+        return
+
     def matrix(self, transpose=True):
         """ Get the matrix representation of the basis orientation.
 
@@ -131,7 +147,7 @@ class basis:
         m = [vector(self.vx), vector(self.vy), vector(self.vz)]
         # Transpose if needed
         if transpose:
-            mt = [m[j][i] for j in range(len(m[0])) for i in range(len(m))]
+            mt = [[m[j][i] for j in range(len(m[0]))] for i in range(len(m))]
         else:
             mt = m
         # Return

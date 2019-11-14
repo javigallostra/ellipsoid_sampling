@@ -7,13 +7,18 @@ from point_base import point
 from basis_to_rt import *
 
 # configuration
-tcp_tool = vector(2000, 5, 463) #x es -z, y es x, z es -y
-part_size = point(425, 425, 1400)
-d_photo = 750
+SAVE = True
+tcp_tool = vector_tool0_to_tdyn(vector(1500,-120,280)) # nos movemos en tdyn
+real_tcp_approx = vector_tool0_to_tdyn(vector(114, 5, 462.5))
+
+print(tcp_tool)
+print(real_tcp_approx)
+part_size = point(700, 700, 1400)
+d_photo = 500
 method = "fibonacci"
-n_points = 20
+n_points = 50
 ichos_tesselation = 2
-crop_z = 0
+crop_z = 600
 
 # compute
 # takes part_size + d_ph as the sphere radius
@@ -34,7 +39,7 @@ print("[MAIN] - Sampled %d points." %(len(ellipsoid.basis)))
 
 # plot
 print("[MAIN] - Plotting sampled points...")
-ellipsoid.plot(False, True, False, None)
+ellipsoid.plot(False, True, False, crop_z)
 
 # adjust positions
 print("[MAIN] - Adjusting positions to robot tool...")
@@ -43,8 +48,9 @@ max_base_h = 0
 min_base_h = 0
 ellipsoid.crop_z(crop_z)
 for b in ellipsoid.basis:
-    # camera is 114 on x direction...
-    b.translate(-tcp_tool[0] + 114, 'z')
+    # adjust program tcp to real tcp
+    b.translate(-real_tcp_approx)
+    b.translate(tcp_tool)
     if b.origin[2] > max_base_h:
         max_base_h = b.origin[2]
     elif b.origin[2] < min_base_h:
@@ -60,8 +66,9 @@ print("[MAIN] - Plotting adjusted points...")
 ellipsoid.plot(False, True, False, min_base_h)
 
 # export to RAPID
-print("[MAIN] - Exporting points to RAPID code...")
-#create_RAPID_module(ellipsoid.basis, "PRUEBA")
+if SAVE:
+    print("[MAIN] - Exporting points to RAPID code...")
+    create_RAPID_module(ellipsoid.basis, "PRUEBA")
 
 print("[MAIN] - Finished.")
 

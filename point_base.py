@@ -115,6 +115,15 @@ class point:
             self.z -= p2.z
         return self
 
+    def __neg__(self):
+        """ Negate itself.
+
+        Return a new point.
+        """
+
+        # Return
+        return self.__mul__(-1)
+
     def __mul__(self, b):
         """ Multiply by a scalar.
 

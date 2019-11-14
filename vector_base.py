@@ -160,6 +160,15 @@ class vector:
         # Return
         return self.__iadd__(b * -1)
 
+    def __neg__(self):
+        """ Negate itself.
+
+        Return a new vector.
+        """
+
+        # Return
+        return self.__mul__(-1)
+
     def __len__(self):
         """ Return the length (dimensions) of the vector."""
 
