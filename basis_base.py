@@ -156,3 +156,11 @@ class basis:
             mt = m
         # Return
         return mt
+
+    def copy(self):
+        """ Return a deep copy of itself."""
+
+        # Create deep copy
+        result = basis(vector(self.origin), self.vz, self.vx, self.vy)
+        # Return
+        return result
