@@ -11,7 +11,6 @@ SAVE = True
 tool_tcp = vector(1500,-120,280)
 part_size = point(700, 700, 1400)
 d_photo = round((1400/2)/0.6, 0)
-print(d_photo)
 method = "fibonacci"
 n_points = 50
 ichos_tesselation = 2

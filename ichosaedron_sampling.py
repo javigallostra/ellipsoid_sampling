@@ -22,7 +22,7 @@ class EIS(ellipsoid_sampling):
         well as their gathering into faces are computed.
         """
         
-        super().__init__(rx, ry, rz)
+        super().__init__(rx, ry, rz, "ichosaedron")
         self.points, self.faces = self._ichosaedron()
         self.basis = [basis(i, self._point_normal(i)) for i in self.points]
 

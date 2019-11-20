@@ -21,7 +21,7 @@ class ETS(EFS):
         Return nothing.
         """
         
-        super().__init__(rx, ry, rz)
+        super().__init__(rx, ry, rz, "thomson")
         self.stop_threshold = 0.00001
         self.max_iterations = 100
         self.max_oscillations = 6

@@ -20,7 +20,7 @@ class EFS(ellipsoid_sampling):
         Return nothing.
         """
         
-        super().__init__(rx,ry,rz)
+        super().__init__(rx,ry,rz,"fibonacci")
         return
 
     def _spiral(self, n_points):

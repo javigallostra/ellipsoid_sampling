@@ -12,7 +12,7 @@ class ellipsoid_sampling(ellipsoid_base):
     and useful methods.
     """
 
-    def __init__(self, rx=1, ry=1, rz=1):
+    def __init__(self, rx=1, ry=1, rz=1, method=None):
         """ Set the initial parameters.
 
         Create empty lists of basis and faces.
@@ -23,6 +23,7 @@ class ellipsoid_sampling(ellipsoid_base):
         super().__init__(rx,ry,rz)
         self.basis = []
         self.faces = []
+        self.method = method
         return
 
     def plot(self, points=True, basis=False, faces=False, crop_z=None):
