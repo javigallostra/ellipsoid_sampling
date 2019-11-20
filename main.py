@@ -10,13 +10,14 @@ from basis_to_rt import RAPIDModuleConverter
 SAVE = True
 tool_tcp = vector(1500,-120,280)
 part_size = point(700, 700, 1400)
-d_photo = 500
+d_photo = round((1400/2)/0.6, 0)
+print(d_photo)
 method = "fibonacci"
 n_points = 50
 ichos_tesselation = 2
-crop_z = 600
-rotation_90 = True
-rotation_neg90 = False
+crop_z = 700
+rotation_90 = False
+rotation_neg90 = True
 
 # compute
 # takes part_size + d_ph as the sphere radius
@@ -43,7 +44,7 @@ ellipsoid.plot(False, True, False, crop_z)
 print("[MAIN] - Adjusting positions to robot tool...")
 # correct with tcp_tool
 max_base_z = 0
-min_base_z = 0
+min_base_z = 2 * abs(crop_z)
 ellipsoid.crop_z(crop_z)
 for b in ellipsoid.basis:
     # Get maximum and minimum base z values
@@ -72,7 +73,7 @@ if rotation_neg90:
     print("[MAIN] - Generating negative 90 degree rotations...")
     for b in ellipsoid.basis:
         b2 = b.copy()
-        b2.rotate(90)
+        b2.rotate(-90)
         rot_neg90_points.append(b2)
     print("[MAIN] - Generated %d negative 90 degree rotations." %(len(rot_neg90_points)))
 
@@ -97,7 +98,7 @@ ellipsoid.plot(False, True, False, min_base_z)
 if SAVE:
     print("[MAIN] - Exporting points to RAPID code...")
     module_converter = RAPIDModuleConverter("PRUEBA", tool_tcp)
-    module_converter.create_RAPID_module(ellipsoid.basis)
+    module_converter.create_RAPID_module(ellipsoid)
 
 print("[MAIN] - Finished.")
 
