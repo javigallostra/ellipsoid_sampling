@@ -7,12 +7,12 @@ from point_base import point
 from basis_to_rt import RAPIDModuleConverter
 
 # configuration
-SAVE = True
+SAVE = False
 tool_tcp = vector(1500,-120,280)
-part_size = point(700, 700, 1400)
+part_size = point(700, 700, 500)
 d_photo = round((1400/2)/0.6, 0)
 method = "fibonacci"
-n_points = 50
+n_points = 27
 ichos_tesselation = 2
 crop_z = 700
 rotation_90 = False
@@ -24,7 +24,7 @@ radius = part_size + point(1, 1, 1) * d_photo
 print("[MAIN] - Sampling ellipsoid...")
 if method == "fibonacci":
     ellipsoid = EFS(radius[0], radius[1], radius[2])
-    ellipsoid.sample(n_points * 2)
+    ellipsoid.sample(n_points, crop_z)
 elif method == "ichosaedron":
     ellipsoid = EIS(radius[0], radius[1], radius[2])
     ellipsoid.sample(ichos_tesselation)

@@ -125,7 +125,7 @@ class ellipsoid_base:
             #find x
             dxdy = p.x / p.y
             dxdz = p.x / p.z
-            x_num = self.rx * self.ry  *self.rz * abs(dxdy * dxdz)
+            x_num = self.rx * self.ry  * self.rz * abs(dxdy * dxdz)
             x_den = sqrt((dxdy * self.ry * dxdz * self.rz)**2 + (self.rx * dxdz * self.rz)**2 + (self.rx * dxdy * self.ry)**2)
             x = x_num / x_den
             if p.x < 0: x = -x

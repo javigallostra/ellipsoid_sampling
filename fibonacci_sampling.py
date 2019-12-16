@@ -23,19 +23,46 @@ class EFS(ellipsoid_sampling):
         super().__init__(rx,ry,rz,"fibonacci")
         return
 
-    def _spiral(self, n_points):
+    def _sphere_lowest_z(self, ellipsoid_z):
+        """ Compute the lowest z value of a sphere point whose projection
+        onto the ellipsoid has the given ellipsoid_z value.
+
+        It works by taking the largest of x/y axis, finding the vector on
+        the corresponding x=0/y=0 plane whose tip lies on the ellipsoid surface
+        at z = ellipsoid_z. Its unitary vector lies on the unitary sphere surface
+        and gives the lowest z value.
+
+        Return the lowest z value.
+        """
+
+        longest_axis_sq = max(self.rx, self.ry)**2
+        rz_sq = self.rz**2
+        norm = math.sqrt(longest_axis_sq + ((rz_sq - longest_axis_sq) / rz_sq) * ellipsoid_z**2)
+        lowest_z = ellipsoid_z / norm
+
+        return lowest_z
+
+    def _spiral(self, n_points, min_z=None):
         """ Distribute n_points on a Fibonacci Spiral.
 
         The spiral is created on a unit sphere and then
         the points are backprojected to the ellipsoidal
         surface.
 
+        An optional min_z parameter is available to decide
+        the z coordinate of the lowest point.
+
         Return the list of points.
         """
 
+        # If no limit is given, take the full sphere
+        if min_z == None:
+            min_z = -1.0
+        else:
+            min_z = self._sphere_lowest_z(min_z)
         # Create spiral on unit sphere and project onto ellipsoid
         dlong = math.pi*(3 - math.sqrt(5))
-        dz = 2.0 / n_points
+        dz = (1.0 - min_z) / n_points
         long = 0
         z = 1 - dz/2
         points = []
@@ -49,15 +76,18 @@ class EFS(ellipsoid_sampling):
         # Return
         return points
 
-    def sample(self, n_points):
+    def sample(self, n_points, min_z=None):
         """ Sample the ellipsoid using the Fibonacci Spiral algorithm.
 
         Get the points and compute their orthogonal basis.
+        An optional minimum z value for the lowest desired point can be given.
+        Otherwise the Fibonacci Spiral algorithm will sample n_points along
+        the whole ellipsoid height.
 
         Return nothing.
         """
         
-        self.points = self._spiral(n_points)
+        self.points = self._spiral(n_points, min_z)
         self.basis = [basis(p, self._point_normal(p)) for p in self.points]
         self.faces = [] # @todo: maybe implement a method to make a mesh
         return
