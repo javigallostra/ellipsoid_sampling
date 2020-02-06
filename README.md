@@ -20,10 +20,10 @@ Ellipsoid with "radii" (1,1,3) subdivided twice and tesselated.
 
 ![Go to image.][imich]
 
-[imich]: https://github.com/javigallostra/ellipsoid_sampling/blob/master/sample_res_ich.png "Ichosaedron sampling and tesellation"
+[imich]: https://github.com/javigallostra/ellipsoid_sampling/blob/master/img/sample_res_ich.png "Ichosaedron sampling and tesellation"
 
 Ellipsoid with "radii" (1,1,3) sampled using the Fibonacci Spiral method with 100 points.
 
 ![Go to image.][imfib]
 
-[imfib]: https://github.com/javigallostra/ellipsoid_sampling/blob/master/sample_res_fib.png "Fibonacci Spiral sampling using 100 points"
+[imfib]: https://github.com/javigallostra/ellipsoid_sampling/blob/master/img/sample_res_fib.png "Fibonacci Spiral sampling using 100 points"
