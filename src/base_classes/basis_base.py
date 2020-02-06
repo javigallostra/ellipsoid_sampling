@@ -1,4 +1,4 @@
-from vector_base import vector
+from base_classes.vector_base import vector
 from math import radians, sin, cos
 
 class basis:

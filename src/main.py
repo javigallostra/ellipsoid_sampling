@@ -1,35 +1,37 @@
-from fibonacci_sampling import EFS
-from ichosaedron_sampling import EIS
-from thomson_sampling import ETS
-from vector_base import vector
-from point_base import point
+from sampling_methods.fibonacci_sampling import EFS
+from sampling_methods.ichosaedron_sampling import EIS
+from sampling_methods.thomson_sampling import ETS
+from base_classes.vector_base import vector
+from base_classes.point_base import point
 
 from basis_to_rt import RAPIDModuleConverter
 
 # configuration
-SAVE = False
+SAVE = True
 tool_tcp = vector(1500,-120,280)
-part_size = point(700, 700, 500)
+part_size = point(200, 200, 1400)
 d_photo = round((1400/2)/0.6, 0)
 method = "fibonacci"
-n_points = 27
+n_points = 70
 ichos_tesselation = 2
-crop_z = 700
+crop_z = 200
 rotation_90 = False
 rotation_neg90 = True
+table_angle = 90
+home_extax_value = 133
 
 # compute
 # takes part_size + d_ph as the sphere radius
-radius = part_size + point(1, 1, 1) * d_photo
+radii = part_size + point(1, 1, 1) * d_photo
 print("[MAIN] - Sampling ellipsoid...")
 if method == "fibonacci":
-    ellipsoid = EFS(radius[0], radius[1], radius[2])
+    ellipsoid = EFS(radii[0], radii[1], radii[2])
     ellipsoid.sample(n_points, crop_z)
 elif method == "ichosaedron":
-    ellipsoid = EIS(radius[0], radius[1], radius[2])
+    ellipsoid = EIS(radii[0], radii[1], radii[2])
     ellipsoid.sample(ichos_tesselation)
 elif method == "thomson":
-    ellipsoid = ETS(radius[0], radius[1], radius[2])
+    ellipsoid = ETS(radii[0], radii[1], radii[2])
     ellipsoid.sample(n_points * 2)
 else:
     raise ValueError("Unknown sampling method: " + method)
@@ -37,16 +39,16 @@ print("[MAIN] - Sampled %d points." %(len(ellipsoid.basis)))
 
 # plot
 print("[MAIN] - Plotting sampled points...")
-ellipsoid.plot(False, True, False, crop_z)
+ellipsoid.plot(True, False, False, crop_z)
 
 # adjust positions
 print("[MAIN] - Adjusting positions to robot tool...")
-# correct with tcp_tool
-max_base_z = 0
-min_base_z = 2 * abs(crop_z)
+# crop the points below crop_z
 ellipsoid.crop_z(crop_z)
+# get maximum and minimum base z values
+max_base_z = 0
+min_base_z = radii[2]
 for b in ellipsoid.basis:
-    # Get maximum and minimum base z values
     if b.origin[2] > max_base_z:
         max_base_z = b.origin[2]
     elif b.origin[2] < min_base_z:
@@ -97,7 +99,7 @@ ellipsoid.plot(False, True, False, min_base_z)
 if SAVE:
     print("[MAIN] - Exporting points to RAPID code...")
     module_converter = RAPIDModuleConverter("PRUEBA", tool_tcp)
-    module_converter.create_RAPID_module(ellipsoid)
+    module_converter.create_RAPID_module(ellipsoid, table_angle, home_extax_value)
 
 print("[MAIN] - Finished.")
 

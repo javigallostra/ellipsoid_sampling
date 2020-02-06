@@ -2,10 +2,10 @@ import mpl_toolkits.mplot3d as a3
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from scipy import rand
-from point_base import point
-from ellipsoid_base import ellipsoid_base
+from base_classes.point_base import point
+from base_classes.ellipsoid_base import ellipsoid_base
 
-class ellipsoid_sampling(ellipsoid_base):
+class ellipsoid_sampling_base(ellipsoid_base):
     """ Ellipsoid sampling class.
 
     Enhances the base class with some attributes

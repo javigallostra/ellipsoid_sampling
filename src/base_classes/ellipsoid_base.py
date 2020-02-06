@@ -1,6 +1,6 @@
 from math import sin, cos, sqrt, degrees, radians, atan2
-from point_base import point
-from vector_base import vector
+from base_classes.point_base import point
+from base_classes.vector_base import vector
 
 class ellipsoid_base:
     """ Basic ellipsoid class.

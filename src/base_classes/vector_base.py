@@ -1,5 +1,5 @@
 from math import sqrt
-from point_base import point
+from base_classes.point_base import point
 
 class vector:
     """ Basic vector class.

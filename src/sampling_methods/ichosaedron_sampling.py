@@ -1,11 +1,11 @@
 import math
-from point_base import point
-from vector_base import vector
-from basis_base import basis
-from quaternion_base import quaternion
-from ellipsoid_sampling import ellipsoid_sampling
+from base_classes.point_base import point
+from base_classes.vector_base import vector
+from base_classes.basis_base import basis
+from base_classes.quaternion_base import quaternion
+from base_classes.ellipsoid_sampling_base import ellipsoid_sampling_base
 
-class EIS(ellipsoid_sampling):
+class EIS(ellipsoid_sampling_base):
     """ Ellipsoidal Ichosaedron Subdivision.
 
     Class to sample an ellipsoid using succesive Ichosaedron

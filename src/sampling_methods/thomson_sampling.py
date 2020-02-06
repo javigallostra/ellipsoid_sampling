@@ -1,10 +1,10 @@
 import math
 from random import uniform, choice
-from point_base import point
-from vector_base import vector
-from basis_base import basis
-from quaternion_base import quaternion
-from fibonacci_sampling import EFS
+from base_classes.point_base import point
+from base_classes.vector_base import vector
+from base_classes.basis_base import basis
+from base_classes.quaternion_base import quaternion
+from sampling_methods.fibonacci_sampling import EFS
 
 class ETS(EFS):
     """ Ellipsoidal Thomson Simulation.
