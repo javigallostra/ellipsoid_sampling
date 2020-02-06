@@ -1,4 +1,6 @@
 __pycache__
-basis_to_rt.*
 *.mod
+/src/3DVM/*
+3dvm_main.*
+
 
