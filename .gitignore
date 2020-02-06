@@ -1,6 +1,6 @@
 __pycache__
 *.mod
-/src/3DVM/*
-3dvm_main.*
+/src/extra_classes/*
+extra_main.*
 
 
